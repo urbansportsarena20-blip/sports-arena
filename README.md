@@ -1,1 +1,1193 @@
-# sports-arena
+[UrbanSportsArena_App_v5.html](https://github.com/user-attachments/files/29095669/UrbanSportsArena_App_v5.html)
+# sports-arena<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Sports Arena"/>
+<meta name="theme-color" content="#1B5E20"/>
+<title>Urban Sports Arena</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:      #1B5E20;
+    --green-mid:  #2E7D32;
+    --green-lite: #E8F5E9;
+    --green-acc:  #43A047;
+    --orange:     #E65100;
+    --orange-lite:#FFF3E0;
+    --red:        #C62828;
+    --red-lite:   #FFEBEE;
+    --grey:       #F5F5F5;
+    --grey-mid:   #9E9E9E;
+    --text:       #212121;
+    --text-soft:  #616161;
+    --white:      #FFFFFF;
+    --radius:     12px;
+    --shadow:     0 2px 12px rgba(0,0,0,0.10);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #F0F4F0;
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-mid) 100%);
+    color: white;
+    padding: 16px 20px 14px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  .header p  { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  .header-icon { font-size: 28px; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white;
+    display: flex;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.12);
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 10px 4px 8px;
+    border: none; background: none; cursor: pointer;
+    font-size: 10px; color: var(--grey-mid);
+    transition: color 0.2s;
+    gap: 3px;
+  }
+  .nav-btn.active { color: var(--green); }
+  .nav-btn span.icon { font-size: 22px; }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 700; color: var(--green);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .stat-card {
+    background: white; border-radius: var(--radius);
+    padding: 14px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-val  { font-size: 24px; font-weight: 800; color: var(--green); }
+  .stat-label{ font-size: 11px; color: var(--text-soft); }
+
+  /* ── BOOKING CARD ── */
+  .booking-card {
+    background: white; border-radius: var(--radius);
+    box-shadow: var(--shadow); margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .booking-top {
+    padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .booking-sport {
+    font-size: 11px; font-weight: 700; color: white;
+    background: var(--green-mid); border-radius: 20px;
+    padding: 3px 10px;
+  }
+  .booking-sport.football { background: #1565C0; }
+  .booking-name { font-size: 15px; font-weight: 700; margin-top: 2px; }
+  .booking-time { font-size: 12px; color: var(--text-soft); margin-top: 1px; }
+  .booking-meta {
+    padding: 0 14px 12px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .booking-amount { font-size: 14px; font-weight: 700; color: var(--green); }
+  .booking-due    { font-size: 12px; color: var(--orange); }
+  .badge {
+    font-size: 11px; font-weight: 700; border-radius: 20px;
+    padding: 3px 10px;
+  }
+  .badge.paid    { background: var(--green-lite); color: var(--green); }
+  .badge.pending { background: var(--orange-lite); color: var(--orange); }
+  .booking-actions {
+    border-top: 1px solid #F0F0F0;
+    display: flex;
+  }
+  .booking-actions button {
+    flex: 1; padding: 10px; border: none; background: none;
+    font-size: 12px; cursor: pointer; font-weight: 600;
+    transition: background 0.15s; border-right: 1px solid #F0F0F0;
+  }
+  .booking-actions button:last-child { border-right: none; }
+  .booking-actions .btn-edit     { color: var(--green); }
+  .booking-actions .btn-whatsapp { color: #25D366; }
+  .booking-actions .btn-delete   { color: var(--red); }
+  .booking-actions button:hover { background: var(--grey); }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text-soft); margin-bottom: 5px; display: block; }
+  .form-input, .form-select {
+    width: 100%; padding: 11px 14px; border: 1.5px solid #E0E0E0;
+    border-radius: 10px; font-size: 15px; color: var(--text);
+    background: white; outline: none; transition: border 0.2s;
+    appearance: none;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--green-acc); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: var(--radius);
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.2s; letter-spacing: 0.3px;
+  }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-secondary { background: var(--grey); color: var(--text); }
+  .btn:active { opacity: 0.85; }
+  .btn-sm {
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    border: none; cursor: pointer;
+  }
+
+  /* ── FAB ── */
+  .fab {
+    position: fixed; bottom: 76px; right: 20px;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--green); color: white;
+    border: none; font-size: 28px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(27,94,32,0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99; transition: transform 0.2s;
+  }
+  .fab:active { transform: scale(0.92); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; width: 100%; border-radius: 20px 20px 0 0;
+    max-height: 92vh; overflow-y: auto;
+    padding: 20px 20px 32px;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .modal-title { font-size: 17px; font-weight: 800; color: var(--green); }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--grey); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: #323232; color: white; padding: 10px 20px;
+    border-radius: 24px; font-size: 13px; z-index: 300;
+    opacity: 0; transition: opacity 0.3s; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── SEARCH ── */
+  .search-box {
+    background: white; border-radius: var(--radius);
+    padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+    box-shadow: var(--shadow); margin-bottom: 12px;
+  }
+  .search-box input {
+    border: none; outline: none; font-size: 14px; width: 100%;
+    color: var(--text); background: transparent;
+  }
+
+  /* ── FILTER CHIPS ── */
+  .chips { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
+  .chip {
+    flex-shrink: 0; padding: 6px 14px; border-radius: 20px; font-size: 12px;
+    font-weight: 600; border: 1.5px solid #E0E0E0; background: white;
+    cursor: pointer; color: var(--text-soft); transition: all 0.15s;
+  }
+  .chip.active { background: var(--green); color: white; border-color: var(--green); }
+
+  /* ── PLAYER CARD ── */
+  .player-card {
+    background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 14px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .player-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--green-lite); color: var(--green);
+    font-size: 18px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .player-name  { font-size: 15px; font-weight: 700; }
+  .player-phone { font-size: 12px; color: var(--text-soft); }
+  .player-sport { font-size: 11px; color: white; background: var(--green-acc); border-radius: 10px; padding: 2px 8px; display: inline-block; margin-top: 3px; }
+
+  /* ── SETUP SCREEN ── */
+  .setup-screen {
+    display: none; position: fixed; inset: 0;
+    background: white; z-index: 999; padding: 32px 24px;
+    overflow-y: auto;
+  }
+  .setup-screen.open { display: block; }
+  .setup-logo { font-size: 48px; text-align: center; margin-bottom: 8px; }
+  .setup-title { font-size: 22px; font-weight: 800; color: var(--green); text-align: center; margin-bottom: 4px; }
+  .setup-sub { font-size: 13px; color: var(--text-soft); text-align: center; margin-bottom: 32px; }
+  .setup-step { background: var(--green-lite); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+  .setup-step-num { font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+  .setup-step-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .setup-url-input {
+    width: 100%; padding: 14px; border: 2px solid var(--green);
+    border-radius: var(--radius); font-size: 14px; margin: 8px 0 16px;
+    outline: none;
+  }
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-soft); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  .loader { text-align: center; padding: 32px; color: var(--text-soft); font-size: 14px; }
+
+  .section-title {
+    font-size: 13px; font-weight: 700; color: var(--text-soft);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 10px; margin-top: 4px;
+  }
+
+
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    display: none; position: fixed; bottom: 76px; left: 12px; right: 12px;
+    background: var(--green); color: white; border-radius: var(--radius);
+    padding: 12px 16px; z-index: 150; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    flex-direction: row; align-items: center; gap: 10px;
+  }
+  .install-banner.show { display: flex; }
+  .install-banner-text { flex: 1; font-size: 13px; line-height: 1.4; }
+  .install-banner-text b { font-size: 14px; }
+  .install-banner-btns { display: flex; gap: 8px; flex-shrink: 0; }
+  .install-btn { padding: 7px 14px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .install-btn-yes { background: white; color: var(--green); }
+  .install-btn-no  { background: rgba(255,255,255,0.2); color: white; }
+
+  .due-chip {
+    font-size: 11px; background: var(--orange-lite); color: var(--orange);
+    border-radius: 10px; padding: 2px 8px; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP SCREEN ══════════════════════════════════════════════ -->
+<div class="setup-screen open" id="setupScreen">
+  <div class="setup-logo">🏟️</div>
+  <div class="setup-title">Urban Sports Arena</div>
+  <div class="setup-sub">One-time setup — do this once on your laptop!</div>
+
+  <div class="setup-step">
+    <div class="setup-step-num">STEP 1</div>
+    <div class="setup-step-text">Open Google Apps Script, paste the full code from <b>UrbanSportsArena_Backend.gs</b> and save.</div>
+  </div>
+  <div class="setup-step">
+    <div class="setup-step-num">STEP 2</div>
+    <div class="setup-step-text"><b>Deploy</b> → <b>New Deployment</b> → Type: <b>Web App</b> → Execute as: <b>Me</b> → Access: <b>Anyone</b> → Deploy</div>
+  </div>
+  <div class="setup-step">
+    <div class="setup-step-num">STEP 3</div>
+    <div class="setup-step-text">After deploying, copy the <b>Web App URL</b> and paste it below:</div>
+  </div>
+
+  <input class="setup-url-input" id="setupUrl" placeholder="https://script.google.com/macros/s/..." />
+  <button class="btn btn-primary" onclick="saveSetup()">✅ Setup Complete — Launch App</button>
+
+  <div style="margin-top:20px; padding:14px; background:#FFF9C4; border-radius:12px; font-size:12px; color:#5D4037; line-height:1.6;">
+    ⚠️ <b>Note:</b> When deploying, set "Execute as: Me" and "Access: Anyone". You will need to allow permissions via your Google account.
+  </div>
+</div>
+
+<!-- ══ HEADER ════════════════════════════════════════════════════ -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🏟️ Urban Sports Arena</h1>
+      <p>Jaipur, Rajasthan</p>
+    </div>
+    <div style="display:flex;gap:6px;">
+    <button onclick="showInstallGuide()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">📲 Install</button>
+    <button onclick="showSetup()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">⚙️</button>
+  </div>
+  </div>
+</div>
+
+<!-- ══ PAGES ═════════════════════════════════════════════════════ -->
+
+<!-- Dashboard -->
+<div class="page active" id="page-dashboard">
+  <div id="dashContent">
+    <div class="loader">Loading...</div>
+  </div>
+</div>
+
+<!-- Bookings -->
+<div class="page" id="page-bookings">
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="Search by name or phone..." oninput="renderBookings()"/>
+  </div>
+  <div class="chips">
+    <div class="chip active" onclick="setFilter('all',this)">All</div>
+    <div class="chip" onclick="setFilter('today',this)">Today</div>
+    <div class="chip" onclick="setFilter('Pending',this)">Pending</div>
+    <div class="chip" onclick="setFilter('Paid',this)">Paid</div>
+    <div class="chip" onclick="setFilter('Cricket',this)">Cricket 🏏</div>
+    <div class="chip" onclick="setFilter('Football',this)">Football ⚽</div>
+  </div>
+  <div id="bookingsList"><div class="loader">Loading...</div></div>
+</div>
+
+<!-- Players -->
+<div class="page" id="page-players">
+  <div id="playersList"><div class="loader">Loading...</div></div>
+</div>
+
+<!-- Payments -->
+<div class="page" id="page-payments">
+  <div id="paymentsContent"><div class="loader">Loading...</div></div>
+</div>
+
+<!-- ══ FAB ═══════════════════════════════════════════════════════ -->
+<button class="fab" id="fabBtn" onclick="openAddModal()">+</button>
+
+<!-- ══ BOTTOM NAV ════════════════════════════════════════════════ -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('dashboard',this)">
+    <span class="icon">🏠</span>Home
+  </button>
+  <button class="nav-btn" onclick="showPage('bookings',this)">
+    <span class="icon">📅</span>Bookings
+  </button>
+  <button class="nav-btn" onclick="showPage('players',this)">
+    <span class="icon">👥</span>Players
+  </button>
+  <button class="nav-btn" onclick="showPage('payments',this)">
+    <span class="icon">💰</span>Payments
+  </button>
+</div>
+
+<!-- ══ BOOKING MODAL ═════════════════════════════════════════════ -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">New Booking</div>
+      <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
+    </div>
+
+    <input type="hidden" id="editId"/>
+
+    <div class="form-group">
+      <label class="form-label">Sport *</label>
+      <select class="form-select" id="fSport">
+        <option value="">-- Select --</option>
+        <option value="Cricket">🏏 Cricket</option>
+        <option value="Football">⚽ Football</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Date *</label>
+      <input class="form-input" type="date" id="fDate"/>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Start Time *</label>
+        <input class="form-input" type="time" id="fStart"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">End Time *</label>
+        <input class="form-input" type="time" id="fEnd"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+        Customer Name *
+        <span onclick="openQuickAddPlayer()" style="color:var(--green);font-size:11px;cursor:pointer;font-weight:700;">+ Add New Player</span>
+      </label>
+      <select class="form-select" id="fCustomer" onchange="onCustomerSelect()">
+        <option value="">-- Select Player --</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Phone</label>
+      <input class="form-input" type="tel" id="fPhone" placeholder="10 digit mobile number"/>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Total ₹ *</label>
+        <input class="form-input" type="number" id="fTotal" placeholder="1000" oninput="calcDue()"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Advance ₹</label>
+        <input class="form-input" type="number" id="fAdvance" placeholder="0" oninput="calcDue()"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Due ₹</label>
+      <input class="form-input" type="number" id="fDue" placeholder="Auto" readonly style="background:#F5F5F5;"/>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Status *</label>
+      <select class="form-select" id="fStatus">
+        <option value="Pending">⏳ Pending</option>
+        <option value="Paid">✅ Paid</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="submitBooking()" id="submitBtn">
+      📅 Save Booking + Sync to Calendar
+    </button>
+  </div>
+</div>
+
+<!-- ══ PLAYER MODAL ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="playerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="playerModalTitle">Add New Player</div>
+      <input type="hidden" id="pEditId"/>
+      <button class="modal-close" onclick="closeModal('playerModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Name *</label>
+      <input class="form-input" type="text" id="pName" placeholder="Player name"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone *</label>
+      <input class="form-input" type="tel" id="pPhone" placeholder="Mobile number"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sport</label>
+      <select class="form-select" id="pSport">
+        <option value="Cricket">🏏 Cricket</option>
+        <option value="Football">⚽ Football</option>
+        <option value="Both">Both</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-select" id="pType">
+        <option value="Walk-in">Walk-in</option>
+        <option value="Regular">Regular</option>
+        <option value="Monthly">Monthly</option>
+        <option value="Academy">Academy</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="submitPlayer()" id="playerSubmitBtn">✅ Save Player</button>
+  </div>
+</div>
+
+<!-- Install Modal -->
+<div class="modal-overlay" id="installModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📱 Add to Home Screen</div>
+      <button class="modal-close" onclick="closeModal('installModal')">✕</button>
+    </div>
+
+    <p style="font-size:13px;color:#616161;margin-bottom:16px;">
+      Save this app to your phone's home screen so it opens like a native app — no browser bar, full screen!
+    </p>
+
+    <!-- Android Steps -->
+    <div style="background:#E8F5E9;border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-weight:800;font-size:13px;color:#1B5E20;margin-bottom:10px;">🤖 Android (Chrome)</div>
+      <div style="font-size:13px;color:#212121;line-height:2;">
+        1️⃣ Open this file in <b>Google Chrome</b><br/>
+        2️⃣ Tap the <b>3-dot menu ⋮</b> (top right)<br/>
+        3️⃣ Tap <b>"Add to Home screen"</b><br/>
+        4️⃣ Tap <b>"Add"</b> — done! ✅
+      </div>
+    </div>
+
+    <!-- iOS Steps -->
+    <div style="background:#E3F2FD;border-radius:12px;padding:14px;margin-bottom:16px;">
+      <div style="font-weight:800;font-size:13px;color:#1565C0;margin-bottom:10px;">🍎 iPhone (Safari)</div>
+      <div style="font-size:13px;color:#212121;line-height:2;">
+        1️⃣ Open this file in <b>Safari</b><br/>
+        2️⃣ Tap the <b>Share button</b> 📤 (bottom bar)<br/>
+        3️⃣ Scroll and tap <b>"Add to Home Screen"</b><br/>
+        4️⃣ Tap <b>"Add"</b> — done! ✅
+      </div>
+    </div>
+
+    <div style="background:#FFF9C4;border-radius:10px;padding:12px;font-size:12px;color:#5D4037;">
+      ⚠️ <b>Important:</b> The app must be opened from a <b>URL (hosted link)</b> for full install support on Android. If you're opening a local file, upload it to Google Drive and open via the Drive link in Chrome.
+    </div>
+
+    <div style="height:12px;"></div>
+    <button class="btn btn-primary" onclick="closeModal('installModal')">Got it!</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────
+var API_URL    = localStorage.getItem("usa_api_url") || "";
+var bookings   = [];
+var players    = [];
+var activeFilter = "all";
+var currentPage  = "dashboard";
+
+// ── SETUP ────────────────────────────────────────────────────────
+function saveSetup() {
+  var url = document.getElementById("setupUrl").value.trim();
+  if (!url.startsWith("https://script.google.com")) {
+    showToast("❌ Please enter a valid URL (must start with script.google.com)");
+    return;
+  }
+  localStorage.setItem("usa_api_url", url);
+  API_URL = url;
+  document.getElementById("setupScreen").classList.remove("open");
+  init();
+}
+
+function showSetup() {
+  document.getElementById("setupUrl").value = API_URL;
+  document.getElementById("setupScreen").classList.add("open");
+}
+
+// ── API ──────────────────────────────────────────────────────────
+async function apiGet(action, params) {
+  var url = API_URL + "?action=" + action;
+  if (params) Object.keys(params).forEach(k => url += "&" + k + "=" + encodeURIComponent(params[k]));
+  var res = await fetch(url);
+  return await res.json();
+}
+
+async function apiPost(data) {
+  var res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+  return await res.json();
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+async function init() {
+  if (!API_URL) { document.getElementById("setupScreen").classList.add("open"); return; }
+  await Promise.all([loadBookings(), loadPlayers()]);
+  renderDashboard();
+  renderBookings();
+  renderPlayers();
+  renderPayments();
+  setTodayDate();
+  updateCustomerDropdown();
+}
+
+async function loadBookings() {
+  try {
+    var r = await apiGet("getBookings");
+    if (r.success) bookings = r.data;
+  } catch(e) { showToast("❌ Could not load bookings — check your internet"); }
+}
+
+async function loadPlayers() {
+  try {
+    var r = await apiGet("getPlayers");
+    if (r.success) players = r.data;
+  } catch(e) {}
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────
+function showPage(page, btn) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-" + page).classList.add("active");
+  if (btn) btn.classList.add("active");
+  currentPage = page;
+
+  var fab = document.getElementById("fabBtn");
+  if (page === "bookings") { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openAddModal; }
+  else if (page === "players") { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openPlayerModal; }
+  else { fab.style.display = "none"; }
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────
+function renderDashboard() {
+  var today = new Date().toISOString().split("T")[0];
+  var todayBookings = bookings.filter(b => b.date === today);
+  var totalRevenue  = bookings.reduce((s,b) => s + (Number(b.total)||0), 0);
+  var totalCollected= bookings.reduce((s,b) => s + (Number(b.advance)||0), 0);
+  var pending       = bookings.filter(b => b.status === "Pending").length;
+
+  var upcomingToday = todayBookings.sort((a,b) => a.start > b.start ? 1 : -1);
+
+  var html = `
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val">${todayBookings.length}</div>
+        <div class="stat-label">📅 Today's Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${pending}</div>
+        <div class="stat-label">⏳ Pending Payments</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">₹${totalCollected.toLocaleString()}</div>
+        <div class="stat-label">✅ Total Collected</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">${players.length}</div>
+        <div class="stat-label">👥 Total Players</div>
+      </div>
+    </div>
+
+    <div class="section-title">Today's Slots</div>
+  `;
+
+  if (upcomingToday.length === 0) {
+    html += `<div class="card" style="text-align:center;color:#9E9E9E;padding:24px;">No bookings today 🏖️</div>`;
+  } else {
+    upcomingToday.forEach(b => { html += bookingCardHtml(b); });
+  }
+
+  document.getElementById("dashContent").innerHTML = html;
+}
+
+// ── BOOKINGS ─────────────────────────────────────────────────────
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  renderBookings();
+}
+
+function renderBookings() {
+  var search = (document.getElementById("searchInput")||{}).value||"";
+  var today  = new Date().toISOString().split("T")[0];
+  var list   = bookings.filter(b => {
+    var matchSearch = !search ||
+      b.customer.toLowerCase().includes(search.toLowerCase()) ||
+      (b.phone||"").includes(search);
+    var matchFilter =
+      activeFilter === "all" ? true :
+      activeFilter === "today" ? b.date === today :
+      activeFilter === "Cricket" ? b.sport === "Cricket" :
+      activeFilter === "Football" ? b.sport === "Football" :
+      b.status === activeFilter;
+    return matchSearch && matchFilter;
+  }).sort((a,b) => b.date > a.date ? 1 : b.date < a.date ? -1 : a.start > b.start ? 1 : -1);
+
+  var html = list.length === 0
+    ? `<div class="empty-state"><div class="icon">📭</div><p>No bookings found</p></div>`
+    : list.map(bookingCardHtml).join("");
+
+  document.getElementById("bookingsList").innerHTML = html;
+}
+
+function bookingCardHtml(b) {
+  var due = Number(b.due)||0;
+  return `
+    <div class="booking-card">
+      <div class="booking-top">
+        <div>
+          <div class="booking-sport ${b.sport==='Football'?'football':''}">${b.sport}</div>
+          <div class="booking-name">${b.customer}</div>
+          <div class="booking-time">📅 ${b.date} &nbsp; 🕐 ${b.start}–${b.end}</div>
+        </div>
+        <span class="badge ${b.status==='Paid'?'paid':'pending'}">${b.status}</span>
+      </div>
+      <div class="booking-meta">
+        <div>
+          <div class="booking-amount">₹${Number(b.total).toLocaleString()}</div>
+          ${due > 0 ? `<div class="booking-due">Due: ₹${due.toLocaleString()}</div>` : ''}
+        </div>
+        <div style="font-size:12px;color:#9E9E9E;">${b.phone||''}</div>
+      </div>
+      <div class="booking-actions">
+        <button class="btn-edit"      onclick="openEditModal('${b.id}')">✏️ Edit</button>
+        <button class="btn-whatsapp"  onclick="sendWhatsApp('${b.id}')">💬 WhatsApp</button>
+        <button class="btn-delete"    onclick="deleteBookingConfirm('${b.id}')">🗑️ Delete</button>
+      </div>
+    </div>`;
+}
+
+// ── ADD / EDIT MODAL ─────────────────────────────────────────────
+function setTodayDate() {
+  var today = new Date().toISOString().split("T")[0];
+  document.getElementById("fDate").value = today;
+}
+
+function calcDue() {
+  var total   = Number(document.getElementById("fTotal").value)||0;
+  var advance = Number(document.getElementById("fAdvance").value)||0;
+  document.getElementById("fDue").value = total - advance;
+}
+
+function openAddModal() {
+  document.getElementById("editId").value = "";
+  document.getElementById("modalTitle").textContent = "New Booking";
+  document.getElementById("submitBtn").textContent = "📅 Save Booking + Sync to Calendar";
+  document.getElementById("fSport").value   = "";
+  document.getElementById("fCustomer").value= "";
+  document.getElementById("fPhone").value   = "";
+  document.getElementById("fTotal").value   = "";
+  document.getElementById("fAdvance").value = "";
+  document.getElementById("fDue").value     = "";
+  document.getElementById("fStatus").value  = "Pending";
+  document.getElementById("fStart").value   = "06:00";
+  document.getElementById("fEnd").value     = "07:00";
+  setTodayDate();
+  document.getElementById("bookingModal").classList.add("open");
+}
+
+function openEditModal(id) {
+  var b = bookings.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById("editId").value     = b.id;
+  document.getElementById("modalTitle").textContent = "Edit Booking";
+  document.getElementById("submitBtn").textContent  = "✅ Update Booking";
+  document.getElementById("fSport").value     = b.sport;
+  document.getElementById("fDate").value      = b.date;
+  document.getElementById("fStart").value     = b.start;
+  document.getElementById("fEnd").value       = b.end;
+  document.getElementById("fCustomer").value  = b.customer;
+  document.getElementById("fPhone").value     = b.phone;
+  document.getElementById("fTotal").value     = b.total;
+  document.getElementById("fAdvance").value   = b.advance;
+  document.getElementById("fDue").value       = b.due;
+  document.getElementById("fStatus").value    = b.status;
+  document.getElementById("bookingModal").classList.add("open");
+}
+
+async function submitBooking() {
+  var id       = document.getElementById("editId").value;
+  var sport    = document.getElementById("fSport").value;
+  var date     = document.getElementById("fDate").value;
+  var start    = document.getElementById("fStart").value;
+  var end      = document.getElementById("fEnd").value;
+  var customer = document.getElementById("fCustomer").value.trim();
+  var phone    = document.getElementById("fPhone").value.trim();
+  var total    = Number(document.getElementById("fTotal").value)||0;
+  var advance  = Number(document.getElementById("fAdvance").value)||0;
+  var status   = document.getElementById("fStatus").value;
+
+  if (!sport || !date || !start || !end || !customer || !total) {
+    showToast("❌ Please fill all required fields!"); return;
+  }
+
+  var btn = document.getElementById("submitBtn");
+  btn.textContent = "⏳ Saving..."; btn.disabled = true;
+
+  try {
+    var data = { action: id ? "editBooking" : "addBooking", id, sport, date, start, end, customer, phone, total, advance, status };
+    var r = await apiPost(data);
+    if (r.success) {
+      showToast(id ? "✅ Booking updated + Calendar synced!" : "✅ Booking saved + Added to Calendar!");
+      closeModal("bookingModal");
+      await loadBookings();
+      renderDashboard(); renderBookings(); renderPayments();
+    } else {
+      showToast("❌ Error: " + (r.error||"Try again"));
+    }
+  } catch(e) { showToast("❌ Network error — check your internet"); }
+
+  btn.textContent = id ? "✅ Update Booking" : "📅 Save Booking + Sync to Calendar";
+  btn.disabled = false;
+}
+
+async function deleteBookingConfirm(id) {
+  var b = bookings.find(x => x.id === id);
+  if (!b) return;
+  if (!confirm(b.customer + "'s booking — are you sure you want to delete?")) return;
+  try {
+    var r = await apiGet("deleteBooking", { id });
+    if (r.success) {
+      showToast("🗑️ Booking deleted + Removed from Calendar!");
+      await loadBookings();
+      renderDashboard(); renderBookings(); renderPayments();
+    }
+  } catch(e) { showToast("❌ Could not delete — please try again"); }
+}
+
+// ── PLAYERS ─────────────────────────────────────────────────────
+function renderPlayers() {
+  var html = players.length === 0
+    ? `<div class="empty-state"><div class="icon">👥</div><p>No players yet — tap + to add one</p></div>`
+    : players.map(p => `
+      <div class="player-card" style="flex-direction:column;align-items:stretch;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="player-avatar">${p.name.charAt(0).toUpperCase()}</div>
+          <div style="flex:1;">
+            <div class="player-name">${p.name}</div>
+            <div class="player-phone">📞 ${p.phone}</div>
+            <span class="player-sport">${p.sport}</span>
+            <span style="font-size:11px;color:#9E9E9E;margin-left:6px;">${p.type}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;border-top:1px solid #F0F0F0;padding-top:10px;">
+          <button onclick="openEditPlayerModal('${p.id}')" style="flex:1;padding:8px;border:1.5px solid var(--green);background:white;color:var(--green);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✏️ Edit</button>
+          <button onclick="deletePlayer('${p.id}')" style="flex:1;padding:8px;border:1.5px solid var(--red);background:white;color:var(--red);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🗑️ Delete</button>
+        </div>
+      </div>`).join("");
+  document.getElementById("playersList").innerHTML = html;
+}
+
+function updatePlayerSuggestions() { updateCustomerDropdown(); }
+
+function openPlayerModal() {
+  document.getElementById("playerModalTitle").textContent = "Add New Player";
+  document.getElementById("pEditId").value = "";
+  document.getElementById("pName").value = "";
+  document.getElementById("pPhone").value = "";
+  document.getElementById("playerSubmitBtn").textContent = "✅ Save Player";
+  document.getElementById("playerModal").classList.add("open");
+}
+
+async function submitPlayer() {
+  var editId = document.getElementById("pEditId").value;
+  var name   = document.getElementById("pName").value.trim();
+  var phone  = document.getElementById("pPhone").value.trim();
+  var sport  = document.getElementById("pSport").value;
+  var type   = document.getElementById("pType").value;
+  if (!name || !phone) { showToast("❌ Name and phone are required!"); return; }
+  try {
+    var payload = editId
+      ? { action: "editPlayer", id: editId, name, phone, sport, type }
+      : { action: "addPlayer", name, phone, sport, type };
+    var r = await apiPost(payload);
+    if (r.success) {
+      showToast(editId ? "✅ Player updated!" : "✅ Player added!");
+      closeModal("playerModal");
+      await loadPlayers();
+      renderPlayers();
+      updateCustomerDropdown();
+    }
+  } catch(e) { showToast("❌ Error saving player — try again"); }
+}
+
+// ── PAYMENTS ─────────────────────────────────────────────────────
+function renderPayments() {
+  var totalRevenue   = bookings.reduce((s,b) => s+(Number(b.total)||0), 0);
+  var totalCollected = bookings.reduce((s,b) => s+(Number(b.advance)||0), 0);
+  var totalDue       = bookings.reduce((s,b) => s+(Number(b.due)||0), 0);
+  var pendingBookings= bookings.filter(b => b.status==="Pending" && Number(b.due)>0);
+
+  var html = `
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val">₹${totalRevenue.toLocaleString()}</div><div class="stat-label">Total Revenue</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--green-acc)">₹${totalCollected.toLocaleString()}</div><div class="stat-label">✅ Collected</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--orange)">₹${totalDue.toLocaleString()}</div><div class="stat-label">⏳ Due</div></div>
+      <div class="stat-card"><div class="stat-val">${pendingBookings.length}</div><div class="stat-label">Pending Bookings</div></div>
+    </div>
+    <div class="section-title">Due Payments</div>
+  `;
+
+  if (pendingBookings.length === 0) {
+    html += `<div class="card" style="text-align:center;padding:24px;color:#9E9E9E;">All payments cleared 🎉</div>`;
+  } else {
+    pendingBookings.forEach(b => {
+      html += `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div>
+              <div style="font-weight:700;">${b.customer}</div>
+              <div style="font-size:12px;color:#9E9E9E;">${b.date} · ${b.sport}</div>
+              <div style="font-size:12px;color:#9E9E9E;">📞 ${b.phone||''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800;color:var(--orange);font-size:18px;">₹${Number(b.due).toLocaleString()}</div>
+              <div style="font-size:11px;color:#9E9E9E;">Due Amount</div>
+            </div>
+          </div>
+          <button onclick="markAsPaid('${b.id}')" style="width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
+            ✅ Mark as Fully Paid
+          </button>
+        </div>`;
+    });
+  }
+
+  document.getElementById("paymentsContent").innerHTML = html;
+}
+
+// ── UTILS ────────────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// Close modal on overlay click
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", function(e) {
+    if (e.target === this) this.classList.remove("open");
+  });
+});
+
+
+// ── INSTALL PWA ──────────────────────────────────────────────────
+var deferredPrompt = null;
+
+// Create manifest dynamically
+(function() {
+  var manifest = {
+    name: "Urban Sports Arena",
+    short_name: "Sports Arena",
+    start_url: window.location.href,
+    display: "standalone",
+    background_color: "#1B5E20",
+    theme_color: "#1B5E20",
+    icons: [{ src: "https://via.placeholder.com/192x192/1B5E20/FFFFFF?text=USA", sizes: "192x192", type: "image/png" }]
+  };
+  var blob = new Blob([JSON.stringify(manifest)], {type: "application/json"});
+  var url  = URL.createObjectURL(blob);
+  document.getElementById("manifestLink").href = url;
+})();
+
+window.addEventListener("beforeinstallprompt", function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem("installDismissed")) {
+    document.getElementById("installBanner").classList.add("show");
+  }
+});
+
+function installApp() {
+  document.getElementById("installBanner").classList.remove("show");
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(r) {
+      if (r.outcome === "accepted") showToast("✅ App installed to home screen!");
+      deferredPrompt = null;
+    });
+  } else {
+    // iOS fallback
+    showIOSInstallGuide();
+  }
+}
+
+function dismissInstall() {
+  document.getElementById("installBanner").classList.remove("show");
+  localStorage.setItem("installDismissed", "1");
+}
+
+function showIOSInstallGuide() {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    alert("To install on iPhone:\n\n1. Tap the Share button (box with arrow) at the bottom\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap \"Add\" — done! 🎉");
+  } else {
+    alert("To install on Android:\n\n1. Tap the 3-dot menu (⋮) in Chrome\n2. Tap \"Add to Home Screen\" or \"Install App\"\n3. Tap \"Install\" — done! 🎉");
+  }
+}
+
+// Show install guide from settings
+function showInstallGuide() { showInstallModal(); }
+function installApp() { showInstallModal(); }
+function showInstallModal() { document.getElementById("installModal").classList.add("open"); }
+function dismissInstall() { document.getElementById("installBanner") && document.getElementById("installBanner").classList.remove("show"); }
+
+// ── WHATSAPP CONFIRMATION ─────────────────────────────────────────
+function formatTime(val) {
+  if (!val) return "";
+  var s = val.toString();
+  // Sheets returns time as ISO string e.g. 1899-12-30T15:38:50.000Z
+  if (s.indexOf("T") !== -1) {
+    var timePart = s.split("T")[1];
+    var parts = timePart.split(":");
+    var h = parseInt(parts[0]);
+    var m = parts[1];
+    return (h < 10 ? "0" + h : "" + h) + ":" + m;
+  }
+  // Already HH:MM
+  if (s.indexOf(":") !== -1) return s.substring(0, 5);
+  return s;
+}
+
+function sendWhatsApp(id) {
+  var b = bookings.find(function(x){ return x.id === id; });
+  if (!b) return;
+
+  var due      = Number(b.due) || 0;
+  var advance  = Number(b.advance) || 0;
+  var total    = Number(b.total) || 0;
+  var startFmt = formatTime(b.start);
+  var endFmt   = formatTime(b.end);
+
+  var paymentLine = due > 0
+    ? "💰 Advance Paid: Rs." + advance + "\n⏳ Due Amount: Rs." + due
+    : "✅ Full Payment: Rs." + total + " (Paid)";
+
+  var message =
+    "🏟️ *URBAN SPORTS ARENA*\n" +
+    "*Booking Confirmation*\n" +
+    "━━━━━━━━━━━━━━━━━━━━━━\n" +
+    "👤 *Name:* " + b.customer + "\n" +
+    "🏏 *Sport:* " + b.sport + "\n" +
+    "📅 *Date:* " + b.date + (b.day ? " (" + b.day + ")" : "") + "\n" +
+    "🕐 *Slot:* " + startFmt + " – " + endFmt + "\n" +
+    "━━━━━━━━━━━━━━━━━━━━━━\n" +
+    paymentLine + "\n" +
+    "━━━━━━━━━━━━━━━━━━━━━━\n" +
+    "📍 *Location:*\n" +
+    "https://maps.app.goo.gl/kfmFcgcrfGDj1NKr9\n\n" +
+    "Please arrive 5 minutes early.\n" +
+    "See you on the field! ⚽🏏\n\n" +
+    "_Urban Sports Arena, Jaipur_";
+
+  var phone = (b.phone || "").toString().replace(/[^0-9]/g, "");
+  if (phone.length === 10) phone = "91" + phone;
+
+  var encoded = encodeURIComponent(message);
+
+  if (phone.length >= 12) {
+    // Deep link — opens WhatsApp OR WhatsApp Business directly
+    window.location.href = "whatsapp://send?phone=" + phone + "&text=" + encoded;
+    // Web fallback after 1.5s
+    setTimeout(function() {
+      window.open("https://api.whatsapp.com/send?phone=" + phone + "&text=" + encoded, "_blank");
+    }, 1500);
+  } else {
+    // No phone number — let user pick contact
+    window.location.href = "whatsapp://send?text=" + encoded;
+    setTimeout(function() {
+      window.open("https://api.whatsapp.com/send?text=" + encoded, "_blank");
+    }, 1500);
+  }
+}
+
+// ── CUSTOMER DROPDOWN ─────────────────────────────────────────────
+function updateCustomerDropdown() {
+  var sel = document.getElementById("fCustomer");
+  if (!sel) return;
+  var current = sel.value;
+  sel.innerHTML = '<option value="">-- Select Player --</option>';
+  players.forEach(function(p) {
+    var opt = document.createElement("option");
+    opt.value = p.name;
+    opt.setAttribute("data-phone", p.phone);
+    opt.textContent = p.name + " (" + p.phone + ")";
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+function onCustomerSelect() {
+  var sel = document.getElementById("fCustomer");
+  var opt = sel.options[sel.selectedIndex];
+  if (opt) {
+    var phone = opt.getAttribute("data-phone");
+    if (phone) document.getElementById("fPhone").value = phone;
+  }
+}
+
+function openQuickAddPlayer() {
+  // Save booking modal state, open player modal on top
+  document.getElementById("playerModalTitle").textContent = "Add New Player";
+  document.getElementById("pEditId").value = "";
+  document.getElementById("pName").value = "";
+  document.getElementById("pPhone").value = "";
+  document.getElementById("pSport").value = "Cricket";
+  document.getElementById("pType").value = "Walk-in";
+  document.getElementById("playerSubmitBtn").textContent = "✅ Save Player";
+  document.getElementById("playerModal").classList.add("open");
+}
+
+// ── MARK AS PAID ──────────────────────────────────────────────────
+async function markAsPaid(id) {
+  var b = bookings.find(x => x.id === id);
+  if (!b) return;
+  if (!confirm("Mark " + b.customer + "'s booking as fully paid?")) return;
+  try {
+    var data = {
+      action: "editBooking",
+      id: b.id, sport: b.sport, date: b.date,
+      start: b.start, end: b.end,
+      customer: b.customer, phone: b.phone,
+      total: b.total, advance: b.total,
+      status: "Paid"
+    };
+    var r = await apiPost(data);
+    if (r.success) {
+      showToast("✅ Payment marked as complete!");
+      await loadBookings();
+      renderDashboard(); renderBookings(); renderPayments();
+    }
+  } catch(e) { showToast("❌ Could not update — try again"); }
+}
+
+// ── EDIT PLAYER ───────────────────────────────────────────────────
+function openEditPlayerModal(id) {
+  var p = players.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById("playerModalTitle").textContent = "Edit Player";
+  document.getElementById("pEditId").value  = p.id;
+  document.getElementById("pName").value    = p.name;
+  document.getElementById("pPhone").value   = p.phone;
+  document.getElementById("pSport").value   = p.sport;
+  document.getElementById("pType").value    = p.type;
+  document.getElementById("playerSubmitBtn").textContent = "✅ Update Player";
+  document.getElementById("playerModal").classList.add("open");
+}
+
+async function deletePlayer(id) {
+  var p = players.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm("Delete player " + p.name + "?")) return;
+  try {
+    var r = await apiGet("deletePlayer", { id });
+    if (r.success) {
+      showToast("🗑️ Player deleted!");
+      await loadPlayers();
+      renderPlayers();
+      updateCustomerDropdown();
+    } else {
+      showToast("❌ Could not delete");
+    }
+  } catch(e) { showToast("❌ Error deleting player"); }
+}
+
+// ── START ────────────────────────────────────────────────────────
+if (API_URL) {
+  document.getElementById("setupScreen").classList.remove("open");
+  init();
+}
+</script>
+</body>
+</html>

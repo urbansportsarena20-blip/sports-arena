@@ -1,5 +1,4 @@
-[UrbanSportsArena_App_v5.html](https://github.com/user-attachments/files/29095669/UrbanSportsArena_App_v5.html)
-# sports-arena<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>

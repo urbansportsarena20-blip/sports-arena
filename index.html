@@ -296,16 +296,105 @@
   .install-btn-yes { background: white; color: var(--green); }
   .install-btn-no  { background: rgba(255,255,255,0.2); color: white; }
 
+
+  /* ── LOGIN SCREEN ── */
+  .login-screen {
+    display: none; position: fixed; inset: 0;
+    background: linear-gradient(160deg, #1B5E20 0%, #2E7D32 60%, #43A047 100%);
+    z-index: 998; padding: 0; align-items: center; justify-content: center;
+  }
+  .login-screen.open { display: flex; }
+  .login-box {
+    background: white; border-radius: 24px; padding: 36px 28px;
+    width: 100%; max-width: 360px; margin: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .login-logo { font-size: 52px; text-align: center; margin-bottom: 8px; }
+  .login-title { font-size: 21px; font-weight: 800; color: var(--green); text-align: center; }
+  .login-sub { font-size: 13px; color: var(--text-soft); text-align: center; margin-bottom: 28px; }
+  .role-tabs { display: flex; background: var(--grey); border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+  .role-tab {
+    flex: 1; text-align: center; padding: 10px; border-radius: 9px;
+    font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-soft);
+    transition: all 0.2s;
+  }
+  .role-tab.active { background: var(--green); color: white; box-shadow: 0 2px 8px rgba(27,94,32,0.3); }
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 24px 0; }
+  .pin-dot {
+    width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--green-mid);
+    transition: all 0.15s;
+  }
+  .pin-dot.filled { background: var(--green); }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pin-key {
+    aspect-ratio: 1; border: none; background: var(--grey);
+    border-radius: 14px; font-size: 20px; font-weight: 700; color: var(--text);
+    cursor: pointer; transition: background 0.1s;
+  }
+  .pin-key:active { background: var(--green-lite); }
+  .pin-key.action { background: none; color: var(--text-soft); font-size: 14px; }
+  .login-error { color: var(--red); font-size: 12px; text-align: center; height: 16px; margin-top: 8px; }
+  .role-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    background: rgba(255,255,255,0.25); color: white; margin-left: 8px;
+  }
+
+
+  /* ── ROLE-BASED VISIBILITY (Staff cannot edit/delete) ── */
+  body.role-staff .btn-edit,
+  body.role-staff .btn-delete,
+  body.role-staff #playerModal .btn-edit,
+  body.role-staff [data-admin-only="true"] {
+    display: none !important;
+  }
+  body.role-staff .booking-actions .btn-whatsapp {
+    border-right: none;
+  }
+
   .due-chip {
     font-size: 11px; background: var(--orange-lite); color: var(--orange);
     border-radius: 10px; padding: 2px 8px; font-weight: 600;
   }
 </style>
 </head>
+<!-- ══ LOGIN SCREEN ══════════════════════════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🏟️</div>
+    <div class="login-title">Urban Sports Arena</div>
+    <div class="login-sub">Enter your PIN to continue</div>
+
+    <div class="role-tabs">
+      <div class="role-tab active" id="tabAdmin" onclick="selectRole('admin')">👑 Admin</div>
+      <div class="role-tab" id="tabStaff" onclick="selectRole('staff')">👤 Staff</div>
+    </div>
+
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="login-error" id="loginError"></div>
+
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key action" onclick="pinClear()">Clear</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key action" onclick="pinBackspace()">⌫</button>
+    </div>
+  </div>
+</div>
+
 <body>
 
 <!-- ══ SETUP SCREEN ══════════════════════════════════════════════ -->
-<div class="setup-screen open" id="setupScreen">
+<div class="setup-screen" id="setupScreen">
   <div class="setup-logo">🏟️</div>
   <div class="setup-title">Urban Sports Arena</div>
   <div class="setup-sub">One-time setup — do this once on your laptop!</div>
@@ -335,12 +424,13 @@
 <div class="header">
   <div class="header-top">
     <div>
-      <h1>🏟️ Urban Sports Arena</h1>
+      <h1>🏟️ Urban Sports Arena <span class="role-badge" id="roleBadge"></span></h1>
       <p>Jaipur, Rajasthan</p>
     </div>
     <div style="display:flex;gap:6px;">
     <button onclick="showInstallGuide()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">📲 Install</button>
     <button onclick="showSetup()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">⚙️</button>
+    <button onclick="logout()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">🚪</button>
   </div>
   </div>
 </div>
@@ -571,6 +661,81 @@ var players    = [];
 var activeFilter = "all";
 var currentPage  = "dashboard";
 
+// ── AUTH STATE ───────────────────────────────────────────────────
+var ADMIN_PIN  = "1234";
+var STAFF_PIN  = "0000";
+var selectedRole = "admin";
+var enteredPin = "";
+var currentRole = sessionStorage.getItem("usa_role") || null;
+var currentPin  = sessionStorage.getItem("usa_pin")  || null;
+
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById("tabAdmin").classList.toggle("active", role === "admin");
+  document.getElementById("tabStaff").classList.toggle("active", role === "staff");
+  pinClear();
+}
+
+function pinPress(digit) {
+  if (enteredPin.length >= 4) return;
+  enteredPin += digit;
+  updatePinDots();
+  if (enteredPin.length === 4) checkPin();
+}
+
+function pinBackspace() {
+  enteredPin = enteredPin.slice(0, -1);
+  updatePinDots();
+  document.getElementById("loginError").textContent = "";
+}
+
+function pinClear() {
+  enteredPin = "";
+  updatePinDots();
+  document.getElementById("loginError").textContent = "";
+}
+
+function updatePinDots() {
+  var dots = document.querySelectorAll("#pinDots .pin-dot");
+  dots.forEach(function(d, i) { d.classList.toggle("filled", i < enteredPin.length); });
+}
+
+function checkPin() {
+  var correctPin = selectedRole === "admin" ? ADMIN_PIN : STAFF_PIN;
+  if (enteredPin === correctPin) {
+    currentRole = selectedRole;
+    currentPin  = enteredPin;
+    sessionStorage.setItem("usa_role", currentRole);
+    sessionStorage.setItem("usa_pin", currentPin);
+    enterApp();
+  } else {
+    document.getElementById("loginError").textContent = "❌ Wrong PIN — try again";
+    setTimeout(function() { pinClear(); }, 600);
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem("usa_role");
+  sessionStorage.removeItem("usa_pin");
+  currentRole = null;
+  currentPin  = null;
+  document.getElementById("loginScreen").classList.add("open");
+  pinClear();
+}
+
+function enterApp() {
+  document.getElementById("loginScreen").classList.remove("open");
+  applyRoleUI();
+  if (API_URL) init();
+  else document.getElementById("setupScreen").classList.add("open");
+}
+
+function applyRoleUI() {
+  var badge = document.getElementById("roleBadge");
+  badge.textContent = currentRole === "admin" ? "👑 Admin" : "👤 Staff";
+  document.body.classList.toggle("role-staff", currentRole === "staff");
+}
+
 // ── SETUP ────────────────────────────────────────────────────────
 function saveSetup() {
   var url = document.getElementById("setupUrl").value.trim();
@@ -592,12 +757,14 @@ function showSetup() {
 // ── API ──────────────────────────────────────────────────────────
 async function apiGet(action, params) {
   var url = API_URL + "?action=" + action;
+  if (currentPin) url += "&pin=" + encodeURIComponent(currentPin);
   if (params) Object.keys(params).forEach(k => url += "&" + k + "=" + encodeURIComponent(params[k]));
   var res = await fetch(url);
   return await res.json();
 }
 
 async function apiPost(data) {
+  if (currentPin) data.pin = currentPin;
   var res = await fetch(API_URL, {
     method: "POST",
     body: JSON.stringify(data)
@@ -775,6 +942,7 @@ function openAddModal() {
 }
 
 function openEditModal(id) {
+  if (currentRole !== "admin") { showToast("❌ Only Admin can edit bookings"); return; }
   var b = bookings.find(x => x.id === id);
   if (!b) return;
   document.getElementById("editId").value     = b.id;
@@ -830,6 +998,7 @@ async function submitBooking() {
 }
 
 async function deleteBookingConfirm(id) {
+  if (currentRole !== "admin") { showToast("❌ Only Admin can delete bookings"); return; }
   var b = bookings.find(x => x.id === id);
   if (!b) return;
   if (!confirm(b.customer + "'s booking — are you sure you want to delete?")) return;
@@ -858,7 +1027,7 @@ function renderPlayers() {
             <span style="font-size:11px;color:#9E9E9E;margin-left:6px;">${p.type}</span>
           </div>
         </div>
-        <div style="display:flex;gap:8px;border-top:1px solid #F0F0F0;padding-top:10px;">
+        <div style="display:flex;gap:8px;border-top:1px solid #F0F0F0;padding-top:10px;" data-admin-only="true">
           <button onclick="openEditPlayerModal('${p.id}')" style="flex:1;padding:8px;border:1.5px solid var(--green);background:white;color:var(--green);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✏️ Edit</button>
           <button onclick="deletePlayer('${p.id}')" style="flex:1;padding:8px;border:1.5px solid var(--red);background:white;color:var(--red);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🗑️ Delete</button>
         </div>
@@ -933,7 +1102,7 @@ function renderPayments() {
               <div style="font-size:11px;color:#9E9E9E;">Due Amount</div>
             </div>
           </div>
-          <button onclick="markAsPaid('${b.id}')" style="width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
+          <button data-admin-only="true" onclick="markAsPaid('${b.id}')" style="width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
             ✅ Mark as Fully Paid
           </button>
         </div>`;
@@ -1130,6 +1299,7 @@ function openQuickAddPlayer() {
 
 // ── MARK AS PAID ──────────────────────────────────────────────────
 async function markAsPaid(id) {
+  if (currentRole !== "admin") { showToast("❌ Only Admin can mark payments as complete"); return; }
   var b = bookings.find(x => x.id === id);
   if (!b) return;
   if (!confirm("Mark " + b.customer + "'s booking as fully paid?")) return;
@@ -1153,6 +1323,7 @@ async function markAsPaid(id) {
 
 // ── EDIT PLAYER ───────────────────────────────────────────────────
 function openEditPlayerModal(id) {
+  if (currentRole !== "admin") { showToast("❌ Only Admin can edit players"); return; }
   var p = players.find(x => x.id === id);
   if (!p) return;
   document.getElementById("playerModalTitle").textContent = "Edit Player";
@@ -1166,6 +1337,7 @@ function openEditPlayerModal(id) {
 }
 
 async function deletePlayer(id) {
+  if (currentRole !== "admin") { showToast("❌ Only Admin can delete players"); return; }
   var p = players.find(x => x.id === id);
   if (!p) return;
   if (!confirm("Delete player " + p.name + "?")) return;
@@ -1183,9 +1355,18 @@ async function deletePlayer(id) {
 }
 
 // ── START ────────────────────────────────────────────────────────
-if (API_URL) {
+if (currentRole && currentPin) {
+  document.getElementById("loginScreen").classList.remove("open");
+  applyRoleUI();
+  if (API_URL) {
+    document.getElementById("setupScreen").classList.remove("open");
+    init();
+  } else {
+    document.getElementById("setupScreen").classList.add("open");
+  }
+} else {
+  document.getElementById("loginScreen").classList.add("open");
   document.getElementById("setupScreen").classList.remove("open");
-  init();
 }
 </script>
 </body>

@@ -893,7 +893,7 @@ function bookingCardHtml(b) {
         <div>
           <div class="booking-sport ${b.sport==='Football'?'football':''}">${b.sport}</div>
           <div class="booking-name">${b.customer}</div>
-          <div class="booking-time">📅 ${b.date} &nbsp; 🕐 ${b.start}–${b.end}</div>
+          <div class="booking-time">📅 ${b.date} &nbsp; 🕐 ${cleanTime(b.start)}–${cleanTime(b.end)}</div>
         </div>
         <span class="badge ${b.status==='Paid'?'paid':'pending'}">${b.status}</span>
       </div>
@@ -950,8 +950,8 @@ function openEditModal(id) {
   document.getElementById("submitBtn").textContent  = "✅ Update Booking";
   document.getElementById("fSport").value     = b.sport;
   document.getElementById("fDate").value      = b.date;
-  document.getElementById("fStart").value     = b.start;
-  document.getElementById("fEnd").value       = b.end;
+  document.getElementById("fStart").value     = cleanTime(b.start);
+  document.getElementById("fEnd").value       = cleanTime(b.end);
   document.getElementById("fCustomer").value  = b.customer;
   document.getElementById("fPhone").value     = b.phone;
   document.getElementById("fTotal").value     = b.total;
@@ -1192,21 +1192,44 @@ function showInstallModal() { document.getElementById("installModal").classList.
 function dismissInstall() { document.getElementById("installBanner") && document.getElementById("installBanner").classList.remove("show"); }
 
 // ── WHATSAPP CONFIRMATION ─────────────────────────────────────────
-function formatTime(val) {
+// Converts ANY time format into clean "HH:MM" that <input type="time"> accepts
+function cleanTime(val) {
   if (!val) return "";
-  var s = val.toString();
-  // Sheets returns time as ISO string e.g. 1899-12-30T15:38:50.000Z
+  var s = val.toString().trim();
+
+  // Case 1: ISO string e.g. "1899-12-30T15:38:50.000Z"
   if (s.indexOf("T") !== -1) {
-    var timePart = s.split("T")[1];
+    var timePart = s.split("T")[1];          // "15:38:50.000Z"
     var parts = timePart.split(":");
     var h = parseInt(parts[0]);
-    var m = parts[1];
-    return (h < 10 ? "0" + h : "" + h) + ":" + m;
+    var m = parseInt(parts[1]);
+    return (h < 10 ? "0"+h : ""+h) + ":" + (m < 10 ? "0"+m : ""+m);
   }
-  // Already HH:MM
-  if (s.indexOf(":") !== -1) return s.substring(0, 5);
-  return s;
+
+  // Case 2: "HH:MM:SS" or "HH:MM:SS.mmm" e.g. "18:30:00"
+  if (s.indexOf(":") !== -1) {
+    var pts = s.split(":");
+    var h2  = parseInt(pts[0]);
+    var m2  = parseInt(pts[1]);
+    if (!isNaN(h2) && !isNaN(m2)) {
+      return (h2 < 10 ? "0"+h2 : ""+h2) + ":" + (m2 < 10 ? "0"+m2 : ""+m2);
+    }
+  }
+
+  // Case 3: Decimal fraction e.g. 0.875 = 21:00
+  var num = parseFloat(s);
+  if (!isNaN(num) && num >= 0 && num < 1) {
+    var totalMins = Math.round(num * 1440);
+    var h3 = Math.floor(totalMins / 60) % 24;
+    var m3 = totalMins % 60;
+    return (h3 < 10 ? "0"+h3 : ""+h3) + ":" + (m3 < 10 ? "0"+m3 : ""+m3);
+  }
+
+  return "";
 }
+
+// Keep formatTime as alias for WhatsApp usage
+function formatTime(val) { return cleanTime(val); }
 
 function sendWhatsApp(id) {
   var b = bookings.find(function(x){ return x.id === id; });
@@ -1307,7 +1330,7 @@ async function markAsPaid(id) {
     var data = {
       action: "editBooking",
       id: b.id, sport: b.sport, date: b.date,
-      start: b.start, end: b.end,
+      start: cleanTime(b.start), end: cleanTime(b.end),
       customer: b.customer, phone: b.phone,
       total: b.total, advance: b.total,
       status: "Paid"

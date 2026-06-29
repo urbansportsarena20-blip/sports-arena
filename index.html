@@ -351,6 +351,80 @@
     border-right: none;
   }
 
+
+  /* ── COMMUNITY LEDGER ── */
+  .match-card {
+    background: white; border-radius: var(--radius);
+    box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden;
+  }
+  .match-header {
+    background: linear-gradient(135deg, #1565C0, #1976D2);
+    padding: 12px 16px; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .match-header-left h3 { font-size: 15px; font-weight: 800; }
+  .match-header-left p  { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+  .match-summary {
+    display: flex; gap: 0;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .match-stat {
+    flex: 1; text-align: center; padding: 10px 4px;
+    border-right: 1px solid #F0F0F0;
+  }
+  .match-stat:last-child { border-right: none; }
+  .match-stat-val   { font-size: 15px; font-weight: 800; color: var(--green); }
+  .match-stat-label { font-size: 10px; color: var(--text-soft); margin-top: 2px; }
+  .match-stat-val.due { color: var(--orange); }
+  .match-stat-val.blue { color: #1565C0; }
+
+  .player-ledger-row {
+    display: flex; align-items: center; padding: 10px 14px;
+    border-bottom: 1px solid #F5F5F5; gap: 10px;
+  }
+  .player-ledger-row:last-child { border-bottom: none; }
+  .player-ledger-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #E3F2FD; color: #1565C0;
+    font-size: 14px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .player-ledger-name  { font-size: 13px; font-weight: 700; flex: 1; }
+  .player-ledger-phone { font-size: 11px; color: var(--text-soft); }
+  .player-ledger-amounts { text-align: right; }
+  .player-ledger-due   { font-size: 13px; font-weight: 800; color: var(--orange); }
+  .player-ledger-paid  { font-size: 11px; color: var(--green); }
+  .player-ledger-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .ledger-btn {
+    padding: 5px 10px; border-radius: 8px; border: none;
+    font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+  .ledger-btn-wa   { background: #E8F5E9; color: #25D366; }
+  .ledger-btn-pay  { background: var(--green-lite); color: var(--green); }
+  .ledger-btn-edit { background: #E3F2FD; color: #1565C0; }
+
+  .match-actions {
+    display: flex; border-top: 1px solid #F0F0F0;
+  }
+  .match-actions button {
+    flex: 1; padding: 10px; border: none; background: none;
+    font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-soft);
+    border-right: 1px solid #F0F0F0;
+  }
+  .match-actions button:last-child { border-right: none; }
+  .match-actions button:hover { background: var(--grey); }
+
+  .community-stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; margin-bottom: 12px;
+  }
+  .community-stat {
+    background: white; border-radius: var(--radius);
+    padding: 12px 8px; box-shadow: var(--shadow); text-align: center;
+  }
+  .community-stat-val   { font-size: 18px; font-weight: 800; color: #1565C0; }
+  .community-stat-label { font-size: 10px; color: var(--text-soft); margin-top: 2px; }
+
   .due-chip {
     font-size: 11px; background: var(--orange-lite); color: var(--orange);
     border-radius: 10px; padding: 2px 8px; font-weight: 600;
@@ -467,6 +541,11 @@
 </div>
 
 <!-- Payments -->
+<!-- Community Ledger Page -->
+<div class="page" id="page-community">
+  <div id="communityContent"><div class="loader">Loading...</div></div>
+</div>
+
 <div class="page" id="page-payments">
   <div id="paymentsContent"><div class="loader">Loading...</div></div>
 </div>
@@ -482,12 +561,97 @@
   <button class="nav-btn" onclick="showPage('bookings',this)">
     <span class="icon">📅</span>Bookings
   </button>
-  <button class="nav-btn" onclick="showPage('players',this)">
-    <span class="icon">👥</span>Players
+  <button class="nav-btn" onclick="showPage('community',this)">
+    <span class="icon">⚽</span>Community
   </button>
   <button class="nav-btn" onclick="showPage('payments',this)">
     <span class="icon">💰</span>Payments
   </button>
+  <button class="nav-btn" onclick="showPage('players',this)">
+    <span class="icon">👥</span>Players
+  </button>
+</div>
+
+<!-- ══ ADD MATCH MODAL ══════════════════════════════════════════ -->
+<div class="modal-overlay" id="matchModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="matchModalTitle">New Community Match</div>
+      <button class="modal-close" onclick="closeModal('matchModal')">✕</button>
+    </div>
+    <input type="hidden" id="mEditId"/>
+    <div class="form-group">
+      <label class="form-label">Sport *</label>
+      <select class="form-select" id="mSport">
+        <option value="Football">⚽ Football</option>
+        <option value="Cricket">🏏 Cricket</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Match Date *</label>
+      <input class="form-input" type="date" id="mDate"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Start Time</label>
+        <input class="form-input" type="time" id="mStart" value="06:00"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">End Time</label>
+        <input class="form-input" type="time" id="mEnd" value="07:00"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Total Match Cost ₹ *</label>
+      <input class="form-input" type="number" id="mTotalCost" placeholder="e.g. 2800" oninput="calcPerHead()"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" type="text" id="mNotes" placeholder="e.g. 7-a-side, friendly"/>
+    </div>
+    <button class="btn btn-primary" onclick="submitMatch()" id="matchSubmitBtn">✅ Create Match</button>
+  </div>
+</div>
+
+<!-- ══ ADD PLAYER TO MATCH MODAL ════════════════════════════════ -->
+<div class="modal-overlay" id="matchPlayerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="mpModalTitle">Add Player to Match</div>
+      <button class="modal-close" onclick="closeModal('matchPlayerModal')">✕</button>
+    </div>
+    <input type="hidden" id="mpMatchId"/>
+    <input type="hidden" id="mpEntryId"/>
+    <div class="form-group">
+      <label class="form-label" style="display:flex;justify-content:space-between;">
+        Player *
+        <span onclick="openQuickAddPlayer()" style="color:var(--green);font-size:11px;cursor:pointer;font-weight:700;">+ New Player</span>
+      </label>
+      <select class="form-select" id="mpPlayer" onchange="onMpPlayerSelect()">
+        <option value="">-- Select Player --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone</label>
+      <input class="form-input" type="tel" id="mpPhone" placeholder="Auto-filled from player"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Amount Due ₹ *</label>
+      <input class="form-input" type="number" id="mpDue" placeholder="Amount this player owes"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Advance Paid ₹</label>
+      <input class="form-input" type="number" id="mpAdvance" placeholder="0" value="0"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-select" id="mpStatus">
+        <option value="Pending">⏳ Pending</option>
+        <option value="Paid">✅ Paid</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="submitMatchPlayer()" id="mpSubmitBtn">✅ Add Player</button>
+  </div>
 </div>
 
 <!-- ══ BOOKING MODAL ═════════════════════════════════════════════ -->
@@ -775,11 +939,12 @@ async function apiPost(data) {
 // ── INIT ─────────────────────────────────────────────────────────
 async function init() {
   if (!API_URL) { document.getElementById("setupScreen").classList.add("open"); return; }
-  await Promise.all([loadBookings(), loadPlayers()]);
+  await Promise.all([loadBookings(), loadPlayers(), loadMatches()]);
   renderDashboard();
   renderBookings();
   renderPlayers();
   renderPayments();
+  renderCommunity();
   setTodayDate();
   updateCustomerDropdown();
 }
@@ -807,8 +972,9 @@ function showPage(page, btn) {
   currentPage = page;
 
   var fab = document.getElementById("fabBtn");
-  if (page === "bookings") { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openAddModal; }
-  else if (page === "players") { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openPlayerModal; }
+  if (page === "bookings")   { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openAddModal; }
+  else if (page === "players")    { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openPlayerModal; }
+  else if (page === "community")  { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openAddMatchModal; }
   else { fab.style.display = "none"; }
 }
 
@@ -1375,6 +1541,341 @@ async function deletePlayer(id) {
       showToast("❌ Could not delete");
     }
   } catch(e) { showToast("❌ Error deleting player"); }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  COMMUNITY LEDGER
+// ════════════════════════════════════════════════════════════════
+var matches = [];   // [{id, sport, date, start, end, totalCost, notes, players:[{...}]}]
+
+// ── LOAD ──────────────────────────────────────────────────────────
+async function loadMatches() {
+  try {
+    var r = await apiGet("getMatches");
+    if (r.success) matches = r.data;
+  } catch(e) { showToast("❌ Could not load community matches"); }
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function renderCommunity() {
+  if (!matches.length) {
+    document.getElementById("communityContent").innerHTML =
+      '<div class="empty-state"><div class="icon">⚽</div><p>No community matches yet<br/>Tap + to create one</p></div>';
+    return;
+  }
+
+  // Summary stats
+  var totalMatches = matches.length;
+  var totalDue     = 0;
+  var totalColl    = 0;
+  matches.forEach(function(m) {
+    (m.players||[]).forEach(function(p) {
+      totalDue  += Number(p.due)     || 0;
+      totalColl += Number(p.advance) || 0;
+    });
+  });
+
+  var html = '<div class="community-stats">'
+    + '<div class="community-stat"><div class="community-stat-val blue">' + totalMatches + '</div><div class="community-stat-label">Matches</div></div>'
+    + '<div class="community-stat"><div class="community-stat-val">₹' + totalColl.toLocaleString() + '</div><div class="community-stat-label">Collected</div></div>'
+    + '<div class="community-stat"><div class="community-stat-val due" style="color:var(--orange)">₹' + totalDue.toLocaleString() + '</div><div class="community-stat-label">Due</div></div>'
+    + '</div>';
+
+  // Sort matches newest first
+  var sorted = matches.slice().sort(function(a,b){ return b.date > a.date ? 1 : -1; });
+
+  sorted.forEach(function(m) {
+    var mPlayers  = m.players || [];
+    var mTotal    = mPlayers.reduce(function(s,p){ return s + (Number(p.due)||0) + (Number(p.advance)||0); }, 0);
+    var mColl     = mPlayers.reduce(function(s,p){ return s + (Number(p.advance)||0); }, 0);
+    var mDue      = mPlayers.reduce(function(s,p){ return s + (Number(p.due)||0); }, 0);
+    var pendCount = mPlayers.filter(function(p){ return p.status !== "Paid" && (Number(p.due)||0) > 0; }).length;
+
+    html += '<div class="match-card">'
+      + '<div class="match-header">'
+      +   '<div class="match-header-left">'
+      +     '<h3>' + (m.sport||'') + ' — ' + (m.date||'') + '</h3>'
+      +     '<p>' + (m.start ? cleanTime(m.start)+' – '+cleanTime(m.end) : '') + (m.notes ? '  •  '+m.notes : '') + '</p>'
+      +   '</div>'
+      +   '<span style="background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;">' + mPlayers.length + ' players</span>'
+      + '</div>'
+
+      // Summary row
+      + '<div class="match-summary">'
+      +   '<div class="match-stat"><div class="match-stat-val blue">₹' + mTotal.toLocaleString() + '</div><div class="match-stat-label">Total</div></div>'
+      +   '<div class="match-stat"><div class="match-stat-val">₹'  + mColl.toLocaleString()  + '</div><div class="match-stat-label">Collected</div></div>'
+      +   '<div class="match-stat"><div class="match-stat-val due">₹' + mDue.toLocaleString()  + '</div><div class="match-stat-label">Due</div></div>'
+      + '</div>';
+
+    // Player rows
+    mPlayers.forEach(function(p) {
+      var due = Number(p.due) || 0;
+      var adv = Number(p.advance) || 0;
+      html += '<div class="player-ledger-row">'
+        + '<div class="player-ledger-avatar">' + (p.name||'?').charAt(0).toUpperCase() + '</div>'
+        + '<div style="flex:1;">'
+        +   '<div class="player-ledger-name">' + (p.name||'') + '</div>'
+        +   '<div class="player-ledger-phone">' + (p.phone||'') + '</div>'
+        + '</div>'
+        + '<div class="player-ledger-amounts">'
+        +   (due > 0
+              ? '<div class="player-ledger-due">₹' + due + ' due</div>'
+              : '<div style="font-size:12px;color:var(--green);font-weight:700;">✅ Paid</div>')
+        +   '<div class="player-ledger-paid">Advance: ₹' + adv + '</div>'
+        + '</div>'
+        + '<div class="player-ledger-actions">'
+        +   '<button class="ledger-btn ledger-btn-wa" onclick="sendCommunityWhatsApp('' + m.id + '','' + p.entryId + '')">💬</button>'
+        +   (currentRole === "admin" && due > 0
+              ? '<button class="ledger-btn ledger-btn-pay" onclick="markPlayerPaid('' + m.id + '','' + p.entryId + '')">✅</button>'
+              : '')
+        +   (currentRole === "admin"
+              ? '<button class="ledger-btn ledger-btn-edit" onclick="openEditMatchPlayer('' + m.id + '','' + p.entryId + '')">✏️</button>'
+              : '')
+        + '</div>'
+        + '</div>';
+    });
+
+    // Match actions
+    html += '<div class="match-actions">'
+      + '<button onclick="openAddMatchPlayerModal('' + m.id + '')">➕ Add Player</button>'
+      + (currentRole === "admin"
+          ? '<button onclick="sendAllReminders('' + m.id + '')">💬 Remind All</button>'
+            + '<button onclick="openEditMatchModal('' + m.id + '')">✏️ Edit</button>'
+            + '<button onclick="deleteMatch('' + m.id + '')" style="color:var(--red);">🗑️</button>'
+          : '')
+      + '</div>'
+      + '</div>';
+  });
+
+  document.getElementById("communityContent").innerHTML = html;
+}
+
+// ── ADD MATCH ─────────────────────────────────────────────────────
+function openAddMatchModal() {
+  document.getElementById("mEditId").value = "";
+  document.getElementById("matchModalTitle").textContent = "New Community Match";
+  document.getElementById("matchSubmitBtn").textContent = "✅ Create Match";
+  document.getElementById("mSport").value = "Football";
+  document.getElementById("mDate").value  = new Date().toISOString().split("T")[0];
+  document.getElementById("mStart").value = "06:00";
+  document.getElementById("mEnd").value   = "07:00";
+  document.getElementById("mTotalCost").value = "";
+  document.getElementById("mNotes").value = "";
+  document.getElementById("matchModal").classList.add("open");
+}
+
+function openEditMatchModal(id) {
+  var m = matches.find(function(x){ return x.id === id; });
+  if (!m) return;
+  document.getElementById("mEditId").value = m.id;
+  document.getElementById("matchModalTitle").textContent = "Edit Match";
+  document.getElementById("matchSubmitBtn").textContent = "✅ Update Match";
+  document.getElementById("mSport").value  = m.sport;
+  document.getElementById("mDate").value   = m.date;
+  document.getElementById("mStart").value  = cleanTime(m.start);
+  document.getElementById("mEnd").value    = cleanTime(m.end);
+  document.getElementById("mTotalCost").value = m.totalCost || "";
+  document.getElementById("mNotes").value  = m.notes || "";
+  document.getElementById("matchModal").classList.add("open");
+}
+
+async function submitMatch() {
+  var editId    = document.getElementById("mEditId").value;
+  var sport     = document.getElementById("mSport").value;
+  var date      = document.getElementById("mDate").value;
+  var start     = document.getElementById("mStart").value;
+  var end       = document.getElementById("mEnd").value;
+  var totalCost = document.getElementById("mTotalCost").value;
+  var notes     = document.getElementById("mNotes").value;
+  if (!sport || !date) { showToast("❌ Sport and Date are required!"); return; }
+  var btn = document.getElementById("matchSubmitBtn");
+  btn.textContent = "⏳ Saving..."; btn.disabled = true;
+  try {
+    var payload = { action: editId ? "editMatch" : "addMatch", id: editId, sport, date, start, end, totalCost, notes };
+    var r = await apiPost(payload);
+    if (r.success) {
+      showToast(editId ? "✅ Match updated!" : "✅ Match created!");
+      closeModal("matchModal");
+      await loadMatches();
+      renderCommunity();
+    } else { showToast("❌ " + (r.error||"Error")); }
+  } catch(e) { showToast("❌ Network error"); }
+  btn.textContent = editId ? "✅ Update Match" : "✅ Create Match";
+  btn.disabled = false;
+}
+
+async function deleteMatch(id) {
+  if (!confirm("Delete this match and all player entries?")) return;
+  try {
+    var r = await apiGet("deleteMatch", { id });
+    if (r.success) {
+      showToast("🗑️ Match deleted!");
+      await loadMatches(); renderCommunity();
+    }
+  } catch(e) { showToast("❌ Could not delete"); }
+}
+
+// ── ADD/EDIT PLAYER TO MATCH ──────────────────────────────────────
+function openAddMatchPlayerModal(matchId) {
+  document.getElementById("mpMatchId").value = matchId;
+  document.getElementById("mpEntryId").value = "";
+  document.getElementById("mpModalTitle").textContent = "Add Player to Match";
+  document.getElementById("mpSubmitBtn").textContent  = "✅ Add Player";
+  document.getElementById("mpPlayer").value   = "";
+  document.getElementById("mpPhone").value    = "";
+  document.getElementById("mpDue").value      = "";
+  document.getElementById("mpAdvance").value  = "0";
+  document.getElementById("mpStatus").value   = "Pending";
+  updateMpPlayerDropdown();
+  document.getElementById("matchPlayerModal").classList.add("open");
+}
+
+function openEditMatchPlayer(matchId, entryId) {
+  var m = matches.find(function(x){ return x.id === matchId; });
+  if (!m) return;
+  var p = (m.players||[]).find(function(x){ return x.entryId === entryId; });
+  if (!p) return;
+  document.getElementById("mpMatchId").value  = matchId;
+  document.getElementById("mpEntryId").value  = entryId;
+  document.getElementById("mpModalTitle").textContent = "Edit Player Entry";
+  document.getElementById("mpSubmitBtn").textContent  = "✅ Update";
+  updateMpPlayerDropdown();
+  document.getElementById("mpPlayer").value   = p.name;
+  document.getElementById("mpPhone").value    = p.phone;
+  document.getElementById("mpDue").value      = p.due;
+  document.getElementById("mpAdvance").value  = p.advance;
+  document.getElementById("mpStatus").value   = p.status;
+  document.getElementById("matchPlayerModal").classList.add("open");
+}
+
+function updateMpPlayerDropdown() {
+  var sel = document.getElementById("mpPlayer");
+  sel.innerHTML = '<option value="">-- Select Player --</option>';
+  players.forEach(function(p) {
+    var opt = document.createElement("option");
+    opt.value = p.name;
+    opt.setAttribute("data-phone", p.phone);
+    opt.textContent = p.name + (p.phone ? " ("+p.phone+")" : "");
+    sel.appendChild(opt);
+  });
+}
+
+function onMpPlayerSelect() {
+  var sel = document.getElementById("mpPlayer");
+  var opt = sel.options[sel.selectedIndex];
+  if (opt) {
+    var phone = opt.getAttribute("data-phone");
+    if (phone) document.getElementById("mpPhone").value = phone;
+  }
+}
+
+async function submitMatchPlayer() {
+  var matchId = document.getElementById("mpMatchId").value;
+  var entryId = document.getElementById("mpEntryId").value;
+  var name    = document.getElementById("mpPlayer").value;
+  var phone   = document.getElementById("mpPhone").value;
+  var due     = Number(document.getElementById("mpDue").value) || 0;
+  var advance = Number(document.getElementById("mpAdvance").value) || 0;
+  var status  = document.getElementById("mpStatus").value;
+  if (!name || !matchId) { showToast("❌ Please select a player!"); return; }
+  var btn = document.getElementById("mpSubmitBtn");
+  btn.textContent = "⏳ Saving..."; btn.disabled = true;
+  try {
+    var payload = { action: "addMatchPlayer", matchId, entryId, name, phone, due, advance, status };
+    var r = await apiPost(payload);
+    if (r.success) {
+      showToast(entryId ? "✅ Player updated!" : "✅ Player added to match!");
+      closeModal("matchPlayerModal");
+      await loadMatches(); renderCommunity();
+    } else { showToast("❌ " + (r.error||"Error")); }
+  } catch(e) { showToast("❌ Network error"); }
+  btn.textContent = entryId ? "✅ Update" : "✅ Add Player";
+  btn.disabled = false;
+}
+
+// ── MARK PLAYER PAID ──────────────────────────────────────────────
+async function markPlayerPaid(matchId, entryId) {
+  var m = matches.find(function(x){ return x.id === matchId; });
+  if (!m) return;
+  var p = (m.players||[]).find(function(x){ return x.entryId === entryId; });
+  if (!p) return;
+  if (!confirm("Mark " + p.name + " as fully paid?")) return;
+  // Staff allowed for community payments
+  try {
+    var payload = { action: "addMatchPlayer", matchId, entryId,
+      name: p.name, phone: p.phone,
+      due: 0, advance: (Number(p.advance)||0) + (Number(p.due)||0),
+      status: "Paid" };
+    var r = await apiPost(payload);
+    if (r.success) {
+      showToast("✅ " + p.name + " marked as Paid!");
+      await loadMatches(); renderCommunity();
+    }
+  } catch(e) { showToast("❌ Could not update"); }
+}
+
+// ── WHATSAPP REMINDER ──────────────────────────────────────────────
+function sendCommunityWhatsApp(matchId, entryId) {
+  var m = matches.find(function(x){ return x.id === matchId; });
+  if (!m) return;
+  var p = (m.players||[]).find(function(x){ return x.entryId === entryId; });
+  if (!p) return;
+  var due = Number(p.due) || 0;
+  var msg = "🏟️ *URBAN SPORTS ARENA*
+"
+    + "*Community Match — Payment Reminder*
+"
+    + "━━━━━━━━━━━━━━━━━━━━━━
+"
+    + "👤 *Player:* " + p.name + "
+"
+    + "⚽ *Sport:* " + m.sport + "
+"
+    + "📅 *Date:* " + m.date + "
+"
+    + "🕐 *Slot:* " + cleanTime(m.start) + " – " + cleanTime(m.end) + "
+"
+    + "━━━━━━━━━━━━━━━━━━━━━━
+"
+    + (due > 0
+        ? "⏳ *Amount Due: Rs." + due + "*
+💰 Advance Paid: Rs." + (p.advance||0)
+        : "✅ *Fully Paid — Thank you!*")
+    + "
+━━━━━━━━━━━━━━━━━━━━━━
+"
+    + "📍 Urban Sports Arena, Jaipur
+"
+    + "https://maps.app.goo.gl/kfmFcgcrfGDj1NKr9
+
+"
+    + "_Please clear your dues at the earliest. Thank you!_";
+  var phone = (p.phone||"").toString().replace(/[^0-9]/g,"");
+  if (phone.length === 10) phone = "91" + phone;
+  var encoded = encodeURIComponent(msg);
+  if (phone.length >= 12) {
+    window.location.href = "whatsapp://send?phone=" + phone + "&text=" + encoded;
+    setTimeout(function(){ window.open("https://api.whatsapp.com/send?phone="+phone+"&text="+encoded,"_blank"); }, 1500);
+  } else {
+    window.location.href = "whatsapp://send?text=" + encoded;
+    setTimeout(function(){ window.open("https://api.whatsapp.com/send?text="+encoded,"_blank"); }, 1500);
+  }
+}
+
+function sendAllReminders(matchId) {
+  var m = matches.find(function(x){ return x.id === matchId; });
+  if (!m) return;
+  var pending = (m.players||[]).filter(function(p){ return (Number(p.due)||0) > 0; });
+  if (!pending.length) { showToast("✅ All players have paid!"); return; }
+  var i = 0;
+  function sendNext() {
+    if (i >= pending.length) { showToast("💬 Sent " + pending.length + " reminders!"); return; }
+    sendCommunityWhatsApp(matchId, pending[i].entryId);
+    i++;
+    setTimeout(sendNext, 2500);
+  }
+  sendNext();
 }
 
 // ── START ────────────────────────────────────────────────────────

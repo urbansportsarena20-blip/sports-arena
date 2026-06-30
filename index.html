@@ -1625,33 +1625,26 @@ function renderCommunity() {
         +   '<div class="player-ledger-paid">Advance: ₹' + adv + '</div>'
         + '</div>'
         + '<div class="player-ledger-actions">'
-        +   '<button class="ledger-btn ledger-btn-wa" onclick="sendCommunityWhatsApp('' + m.id + '','' + p.entryId + '')">💬</button>'
-        +   (currentRole === "admin" && due > 0
-              ? '<button class="ledger-btn ledger-btn-pay" onclick="markPlayerPaid('' + m.id + '','' + p.entryId + '')">✅</button>'
-              : '')
-        +   (currentRole === "admin"
-              ? '<button class="ledger-btn ledger-btn-edit" onclick="openEditMatchPlayer('' + m.id + '','' + p.entryId + '')">✏️</button>'
-              : '')
-        + '</div>'
+        +   '<button class="ledger-btn ledger-btn-wa" data-mid="' + m.id + '" data-eid="' + p.entryId + '" onclick="communityWA(this)">💬</button>'
+        +   (due > 0 ? '<button class="ledger-btn ledger-btn-pay" data-mid="' + m.id + '" data-eid="' + p.entryId + '" onclick="communityPay(this)">✅</button>' : '')
+        +   '<button class="ledger-btn ledger-btn-edit" data-mid="' + m.id + '" data-eid="' + p.entryId + '" onclick="communityEdit(this)">✏️</button>'
         + '</div>';
     });
 
     // Match actions
-    html += '<div class="match-actions">'
-      + '<button onclick="openAddMatchPlayerModal('' + m.id + '')">➕ Add Player</button>'
-      + (currentRole === "admin"
-          ? '<button onclick="sendAllReminders('' + m.id + '')">💬 Remind All</button>'
-            + '<button onclick="openEditMatchModal('' + m.id + '')">✏️ Edit</button>'
-            + '<button onclick="deleteMatch('' + m.id + '')" style="color:var(--red);">🗑️</button>'
-          : '')
-      + '</div>'
-      + '</div>';
+    var matchActHtml = '<div class="match-actions">';
+    matchActHtml += '<button onclick="openAddMatchPlayerModal(this)" data-mid="' + m.id + '">+ Add Player</button>';
+    matchActHtml += '<button onclick="sendAllRemindersBtn(this)" data-mid="' + m.id + '">&#128172; Remind All</button>';
+    matchActHtml += '<button onclick="openEditMatchModal(this)" data-mid="' + m.id + '">&#9999; Edit</button>';
+    matchActHtml += '<button onclick="deleteMatchBtn(this)" data-mid="' + m.id + '" style="color:var(--red);">&#128465;</button>';
+    matchActHtml += '</div></div>';
+    html += matchActHtml;
   });
 
   document.getElementById("communityContent").innerHTML = html;
 }
 
-// ── ADD MATCH ─────────────────────────────────────────────────────
+// ── ADD MATCH ─────────────────────────────────────────────────
 function openAddMatchModal() {
   document.getElementById("mEditId").value = "";
   document.getElementById("matchModalTitle").textContent = "New Community Match";
@@ -1662,21 +1655,6 @@ function openAddMatchModal() {
   document.getElementById("mEnd").value   = "07:00";
   document.getElementById("mTotalCost").value = "";
   document.getElementById("mNotes").value = "";
-  document.getElementById("matchModal").classList.add("open");
-}
-
-function openEditMatchModal(id) {
-  var m = matches.find(function(x){ return x.id === id; });
-  if (!m) return;
-  document.getElementById("mEditId").value = m.id;
-  document.getElementById("matchModalTitle").textContent = "Edit Match";
-  document.getElementById("matchSubmitBtn").textContent = "✅ Update Match";
-  document.getElementById("mSport").value  = m.sport;
-  document.getElementById("mDate").value   = m.date;
-  document.getElementById("mStart").value  = cleanTime(m.start);
-  document.getElementById("mEnd").value    = cleanTime(m.end);
-  document.getElementById("mTotalCost").value = m.totalCost || "";
-  document.getElementById("mNotes").value  = m.notes || "";
   document.getElementById("matchModal").classList.add("open");
 }
 
@@ -1863,6 +1841,49 @@ function sendAllReminders(matchId) {
   }
   sendNext();
 }
+
+
+// ── COMMUNITY BUTTON HELPERS (use data attributes to avoid quote issues) ────
+function communityWA(btn) {
+  sendCommunityWhatsApp(btn.getAttribute("data-mid"), btn.getAttribute("data-eid"));
+}
+function communityPay(btn) {
+  markPlayerPaid(btn.getAttribute("data-mid"), btn.getAttribute("data-eid"));
+}
+function communityEdit(btn) {
+  openEditMatchPlayer(btn.getAttribute("data-mid"), btn.getAttribute("data-eid"));
+}
+function openAddMatchPlayerModal(btn) {
+  var matchId = typeof btn === "string" ? btn : btn.getAttribute("data-mid");
+  document.getElementById("mpMatchId").value = matchId;
+  document.getElementById("mpEntryId").value = "";
+  document.getElementById("mpModalTitle").textContent = "Add Player to Match";
+  document.getElementById("mpSubmitBtn").textContent  = "✅ Add Player";
+  document.getElementById("mpPlayer").value   = "";
+  document.getElementById("mpPhone").value    = "";
+  document.getElementById("mpDue").value      = "";
+  document.getElementById("mpAdvance").value  = "0";
+  document.getElementById("mpStatus").value   = "Pending";
+  updateMpPlayerDropdown();
+  document.getElementById("matchPlayerModal").classList.add("open");
+}
+function sendAllRemindersBtn(btn) { sendAllReminders(btn.getAttribute("data-mid")); }
+function openEditMatchModal(btn) {
+  var id = typeof btn === "string" ? btn : btn.getAttribute("data-mid");
+  var m = matches.find(function(x){ return x.id === id; });
+  if (!m) return;
+  document.getElementById("mEditId").value = m.id;
+  document.getElementById("matchModalTitle").textContent = "Edit Match";
+  document.getElementById("matchSubmitBtn").textContent = "✅ Update Match";
+  document.getElementById("mSport").value  = m.sport;
+  document.getElementById("mDate").value   = m.date;
+  document.getElementById("mStart").value  = cleanTime(m.start);
+  document.getElementById("mEnd").value    = cleanTime(m.end);
+  document.getElementById("mTotalCost").value = m.totalCost || "";
+  document.getElementById("mNotes").value  = m.notes || "";
+  document.getElementById("matchModal").classList.add("open");
+}
+function deleteMatchBtn(btn) { deleteMatch(btn.getAttribute("data-mid")); }
 
 // ── START ────────────────────────────────────────────────────────
 if (currentRole && currentPin) {

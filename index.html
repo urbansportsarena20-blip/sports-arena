@@ -1353,6 +1353,10 @@ function showIOSInstallGuide() {
 
 // Show install guide from settings
 function showInstallGuide() { showInstallModal(); }
+function showSetup() {
+  document.getElementById("setupUrl").value = API_URL || "";
+  document.getElementById("setupScreen").classList.add("open");
+}
 function installApp() { showInstallModal(); }
 function showInstallModal() { document.getElementById("installModal").classList.add("open"); }
 function dismissInstall() { document.getElementById("installBanner") && document.getElementById("installBanner").classList.remove("show"); }
@@ -1818,34 +1822,20 @@ function sendCommunityWhatsApp(matchId, entryId) {
   var p = (m.players||[]).find(function(x){ return x.entryId === entryId; });
   if (!p) return;
   var due = Number(p.due) || 0;
-  var msg = "🏟️ *URBAN SPORTS ARENA*
-"
-    + "*Community Match — Payment Reminder*
-"
-    + "━━━━━━━━━━━━━━━━━━━━━━
-"
-    + "👤 *Player:* " + p.name + "
-"
-    + "⚽ *Sport:* " + m.sport + "
-"
-    + "📅 *Date:* " + m.date + "
-"
-    + "🕐 *Slot:* " + cleanTime(m.start) + " – " + cleanTime(m.end) + "
-"
-    + "━━━━━━━━━━━━━━━━━━━━━━
-"
+  var msg = "🏟️ *URBAN SPORTS ARENA*\n"
+    + "*Community Match — Payment Reminder*\n"
+    + "━━━━━━━━━━━━━━━━━━━━━━\n"
+    + "👤 *Player:* " + p.name + "\n"
+    + "⚽ *Sport:* " + m.sport + "\n"
+    + "📅 *Date:* " + m.date + "\n"
+    + "🕐 *Slot:* " + cleanTime(m.start) + " – " + cleanTime(m.end) + "\n"
+    + "━━━━━━━━━━━━━━━━━━━━━━\n"
     + (due > 0
-        ? "⏳ *Amount Due: Rs." + due + "*
-💰 Advance Paid: Rs." + (p.advance||0)
+        ? "⏳ *Amount Due: Rs." + due + "*\n💰 Advance Paid: Rs." + (p.advance||0)
         : "✅ *Fully Paid — Thank you!*")
-    + "
-━━━━━━━━━━━━━━━━━━━━━━
-"
-    + "📍 Urban Sports Arena, Jaipur
-"
-    + "https://maps.app.goo.gl/kfmFcgcrfGDj1NKr9
-
-"
+    + "\n━━━━━━━━━━━━━━━━━━━━━━\n"
+    + "📍 Urban Sports Arena, Jaipur\n"
+    + "https://maps.app.goo.gl/kfmFcgcrfGDj1NKr9\n\n"
     + "_Please clear your dues at the earliest. Thank you!_";
   var phone = (p.phone||"").toString().replace(/[^0-9]/g,"");
   if (phone.length === 10) phone = "91" + phone;

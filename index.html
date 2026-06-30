@@ -1353,10 +1353,6 @@ function showIOSInstallGuide() {
 
 // Show install guide from settings
 function showInstallGuide() { showInstallModal(); }
-function showSetup() {
-  document.getElementById("setupUrl").value = API_URL || "";
-  document.getElementById("setupScreen").classList.add("open");
-}
 function installApp() { showInstallModal(); }
 function showInstallModal() { document.getElementById("installModal").classList.add("open"); }
 function dismissInstall() { document.getElementById("installBanner") && document.getElementById("installBanner").classList.remove("show"); }
@@ -1629,21 +1625,25 @@ function renderCommunity() {
         +   '<div class="player-ledger-paid">Advance: ₹' + adv + '</div>'
         + '</div>'
         + '<div class="player-ledger-actions">'
-        +   '<button class="ledger-btn ledger-btn-wa" onclick="sendCommunityWhatsApp(\'' + m.id + '\',\'' + p.entryId + '\')">💬</button>'
-        +   (due > 0
-              ? '<button class="ledger-btn ledger-btn-pay" onclick="markPlayerPaid(\'' + m.id + '\',\'' + p.entryId + '\')">✅</button>'
+        +   '<button class="ledger-btn ledger-btn-wa" onclick="sendCommunityWhatsApp('' + m.id + '','' + p.entryId + '')">💬</button>'
+        +   (currentRole === "admin" && due > 0
+              ? '<button class="ledger-btn ledger-btn-pay" onclick="markPlayerPaid('' + m.id + '','' + p.entryId + '')">✅</button>'
               : '')
-        +   '<button class="ledger-btn ledger-btn-edit" onclick="openEditMatchPlayer(\'' + m.id + '\',\'' + p.entryId + '\')">✏️</button>'
+        +   (currentRole === "admin"
+              ? '<button class="ledger-btn ledger-btn-edit" onclick="openEditMatchPlayer('' + m.id + '','' + p.entryId + '')">✏️</button>'
+              : '')
         + '</div>'
         + '</div>';
     });
 
     // Match actions
     html += '<div class="match-actions">'
-      + '<button onclick="openAddMatchPlayerModal(\'' + m.id + '\')">➕ Add Player</button>'
-      + '<button onclick="sendAllReminders(\'' + m.id + '\')">💬 Remind All</button>'
-      + '<button onclick="openEditMatchModal(\'' + m.id + '\')">✏️ Edit</button>'
-      + '<button onclick="deleteMatch(\'' + m.id + '\')" style="color:var(--red);">🗑️</button>'
+      + '<button onclick="openAddMatchPlayerModal('' + m.id + '')">➕ Add Player</button>'
+      + (currentRole === "admin"
+          ? '<button onclick="sendAllReminders('' + m.id + '')">💬 Remind All</button>'
+            + '<button onclick="openEditMatchModal('' + m.id + '')">✏️ Edit</button>'
+            + '<button onclick="deleteMatch('' + m.id + '')" style="color:var(--red);">🗑️</button>'
+          : '')
       + '</div>'
       + '</div>';
   });

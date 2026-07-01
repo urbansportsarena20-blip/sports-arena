@@ -517,13 +517,31 @@ async function apiGet(action, params) {
   var url = API_URL + '?action=' + action;
   if (currentPin) url += '&pin=' + encodeURIComponent(currentPin);
   if (params) Object.keys(params).forEach(function(k){ url += '&' + k + '=' + encodeURIComponent(params[k]); });
-  var r = await fetch(url);
-  return await r.json();
+  try {
+    var r = await fetch(url);
+    var text = await r.text();
+    try { return JSON.parse(text); }
+    catch(e) { console.error('API GET response not JSON:', text); return { error: 'Invalid response' }; }
+  } catch(e) {
+    console.error('apiGet error:', e);
+    return { error: 'Network error: ' + e.message };
+  }
 }
 async function apiPost(data) {
   if (currentPin) data.pin = currentPin;
-  var r = await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
-  return await r.json();
+  try {
+    var r = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    var text = await r.text();
+    try { return JSON.parse(text); }
+    catch(e) { console.error('API response not JSON:', text); return { error: 'Invalid response from server' }; }
+  } catch(e) {
+    console.error('apiPost error:', e);
+    return { error: 'Network error: ' + e.message };
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1023,12 +1041,26 @@ async function submitMatch() {
   var cost   = document.getElementById('mCost').value;
   var notes  = document.getElementById('mNotes').value;
   if (!sport||!date) { showToast('❌ Sport and Date required!'); return; }
+  if (!API_URL) { showToast('❌ API URL not set — tap ⚙️ Settings'); return; }
   var btn = document.getElementById('mSubmitBtn');
   btn.textContent='⏳ Saving...'; btn.disabled=true;
-  var r = await apiPost({ action:editId?'editMatch':'addMatch', id:editId, sport, date, start, end, totalCost:cost, notes });
-  if (r.success) { showToast(editId?'✅ Match updated!':'✅ Match created!'); closeModal('matchModal'); await reload(); }
-  else showToast('❌ '+(r.error||'Error'));
-  btn.textContent = editId?'✅ Update Match':'✅ Create Match'; btn.disabled=false;
+  try {
+    var payload = { action: editId?'editMatch':'addMatch', sport:sport, date:date, start:start, end:end, totalCost:cost, notes:notes };
+    if (editId) payload.id = editId;
+    var r = await apiPost(payload);
+    if (r && r.success) {
+      showToast(editId?'✅ Match updated!':'✅ Match created!');
+      closeModal('matchModal');
+      await reload();
+    } else {
+      showToast('❌ ' + (r && r.error ? r.error : 'Server error — check Apps Script'));
+    }
+  } catch(e) {
+    showToast('❌ Network error: ' + e.message);
+    console.error('submitMatch error:', e);
+  }
+  btn.textContent = editId?'✅ Update Match':'✅ Create Match';
+  btn.disabled = false;
 }
 function openMpModal(btn) {
   var mid = btn.getAttribute('data-mid');

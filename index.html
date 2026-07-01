@@ -8,446 +8,189 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Sports Arena"/>
 <meta name="theme-color" content="#1B5E20"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon.png"/>
 <title>Urban Sports Arena</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --green:      #1B5E20;
-    --green-mid:  #2E7D32;
-    --green-lite: #E8F5E9;
-    --green-acc:  #43A047;
-    --orange:     #E65100;
-    --orange-lite:#FFF3E0;
-    --red:        #C62828;
-    --red-lite:   #FFEBEE;
-    --grey:       #F5F5F5;
-    --grey-mid:   #9E9E9E;
-    --text:       #212121;
-    --text-soft:  #616161;
-    --white:      #FFFFFF;
-    --radius:     12px;
-    --shadow:     0 2px 12px rgba(0,0,0,0.10);
-  }
-
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #F0F4F0;
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 80px;
-  }
-
-  /* ── HEADER ── */
-  .header {
-    background: linear-gradient(135deg, var(--green) 0%, var(--green-mid) 100%);
-    color: white;
-    padding: 16px 20px 14px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  .header-top { display: flex; align-items: center; justify-content: space-between; }
-  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
-  .header p  { font-size: 11px; opacity: 0.8; margin-top: 2px; }
-  .header-icon { font-size: 28px; }
-
-  /* ── BOTTOM NAV ── */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: white;
-    display: flex;
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.12);
-    z-index: 100;
-  }
-  .nav-btn {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    padding: 10px 4px 8px;
-    border: none; background: none; cursor: pointer;
-    font-size: 10px; color: var(--grey-mid);
-    transition: color 0.2s;
-    gap: 3px;
-  }
-  .nav-btn.active { color: var(--green); }
-  .nav-btn span.icon { font-size: 22px; }
-
-  /* ── PAGES ── */
-  .page { display: none; padding: 16px; }
-  .page.active { display: block; }
-
-  /* ── CARDS ── */
-  .card {
-    background: white;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .card-title {
-    font-size: 13px; font-weight: 700; color: var(--green);
-    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
-  }
-
-  /* ── STATS ROW ── */
-  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .stat-card {
-    background: white; border-radius: var(--radius);
-    padding: 14px; box-shadow: var(--shadow);
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .stat-val  { font-size: 24px; font-weight: 800; color: var(--green); }
-  .stat-label{ font-size: 11px; color: var(--text-soft); }
-
-  /* ── BOOKING CARD ── */
-  .booking-card {
-    background: white; border-radius: var(--radius);
-    box-shadow: var(--shadow); margin-bottom: 10px;
-    overflow: hidden;
-  }
-  .booking-top {
-    padding: 12px 14px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .booking-sport {
-    font-size: 11px; font-weight: 700; color: white;
-    background: var(--green-mid); border-radius: 20px;
-    padding: 3px 10px;
-  }
-  .booking-sport.football { background: #1565C0; }
-  .booking-name { font-size: 15px; font-weight: 700; margin-top: 2px; }
-  .booking-time { font-size: 12px; color: var(--text-soft); margin-top: 1px; }
-  .booking-meta {
-    padding: 0 14px 12px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .booking-amount { font-size: 14px; font-weight: 700; color: var(--green); }
-  .booking-due    { font-size: 12px; color: var(--orange); }
-  .badge {
-    font-size: 11px; font-weight: 700; border-radius: 20px;
-    padding: 3px 10px;
-  }
-  .badge.paid    { background: var(--green-lite); color: var(--green); }
-  .badge.pending { background: var(--orange-lite); color: var(--orange); }
-  .booking-actions {
-    border-top: 1px solid #F0F0F0;
-    display: flex;
-  }
-  .booking-actions button {
-    flex: 1; padding: 10px; border: none; background: none;
-    font-size: 12px; cursor: pointer; font-weight: 600;
-    transition: background 0.15s; border-right: 1px solid #F0F0F0;
-  }
-  .booking-actions button:last-child { border-right: none; }
-  .booking-actions .btn-edit     { color: var(--green); }
-  .booking-actions .btn-whatsapp { color: #25D366; }
-  .booking-actions .btn-delete   { color: var(--red); }
-  .booking-actions button:hover { background: var(--grey); }
-
-  /* ── FORM ── */
-  .form-group { margin-bottom: 14px; }
-  .form-label { font-size: 12px; font-weight: 600; color: var(--text-soft); margin-bottom: 5px; display: block; }
-  .form-input, .form-select {
-    width: 100%; padding: 11px 14px; border: 1.5px solid #E0E0E0;
-    border-radius: 10px; font-size: 15px; color: var(--text);
-    background: white; outline: none; transition: border 0.2s;
-    appearance: none;
-  }
-  .form-input:focus, .form-select:focus { border-color: var(--green-acc); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  /* ── BUTTONS ── */
-  .btn {
-    width: 100%; padding: 14px; border: none; border-radius: var(--radius);
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    transition: opacity 0.2s; letter-spacing: 0.3px;
-  }
-  .btn-primary { background: var(--green); color: white; }
-  .btn-secondary { background: var(--grey); color: var(--text); }
-  .btn:active { opacity: 0.85; }
-  .btn-sm {
-    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
-    border: none; cursor: pointer;
-  }
-
-  /* ── FAB ── */
-  .fab {
-    position: fixed; bottom: 76px; right: 20px;
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--green); color: white;
-    border: none; font-size: 28px; cursor: pointer;
-    box-shadow: 0 4px 16px rgba(27,94,32,0.4);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 99; transition: transform 0.2s;
-  }
-  .fab:active { transform: scale(0.92); }
-
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5); z-index: 200;
-    align-items: flex-end;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: white; width: 100%; border-radius: 20px 20px 0 0;
-    max-height: 92vh; overflow-y: auto;
-    padding: 20px 20px 32px;
-    animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 18px;
-  }
-  .modal-title { font-size: 17px; font-weight: 800; color: var(--green); }
-  .modal-close {
-    width: 32px; height: 32px; border-radius: 50%; border: none;
-    background: var(--grey); font-size: 18px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-    background: #323232; color: white; padding: 10px 20px;
-    border-radius: 24px; font-size: 13px; z-index: 300;
-    opacity: 0; transition: opacity 0.3s; white-space: nowrap;
-  }
-  .toast.show { opacity: 1; }
-
-  /* ── SEARCH ── */
-  .search-box {
-    background: white; border-radius: var(--radius);
-    padding: 10px 14px; display: flex; align-items: center; gap: 8px;
-    box-shadow: var(--shadow); margin-bottom: 12px;
-  }
-  .search-box input {
-    border: none; outline: none; font-size: 14px; width: 100%;
-    color: var(--text); background: transparent;
-  }
-
-  /* ── FILTER CHIPS ── */
-  .chips { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
-  .chip {
-    flex-shrink: 0; padding: 6px 14px; border-radius: 20px; font-size: 12px;
-    font-weight: 600; border: 1.5px solid #E0E0E0; background: white;
-    cursor: pointer; color: var(--text-soft); transition: all 0.15s;
-  }
-  .chip.active { background: var(--green); color: white; border-color: var(--green); }
-
-  /* ── PLAYER CARD ── */
-  .player-card {
-    background: white; border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: 14px; margin-bottom: 10px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .player-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--green-lite); color: var(--green);
-    font-size: 18px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .player-name  { font-size: 15px; font-weight: 700; }
-  .player-phone { font-size: 12px; color: var(--text-soft); }
-  .player-sport { font-size: 11px; color: white; background: var(--green-acc); border-radius: 10px; padding: 2px 8px; display: inline-block; margin-top: 3px; }
-
-  /* ── SETUP SCREEN ── */
-  .setup-screen {
-    display: none; position: fixed; inset: 0;
-    background: white; z-index: 999; padding: 32px 24px;
-    overflow-y: auto;
-  }
-  .setup-screen.open { display: block; }
-  .setup-logo { font-size: 48px; text-align: center; margin-bottom: 8px; }
-  .setup-title { font-size: 22px; font-weight: 800; color: var(--green); text-align: center; margin-bottom: 4px; }
-  .setup-sub { font-size: 13px; color: var(--text-soft); text-align: center; margin-bottom: 32px; }
-  .setup-step { background: var(--green-lite); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
-  .setup-step-num { font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
-  .setup-step-text { font-size: 13px; color: var(--text); line-height: 1.5; }
-  .setup-url-input {
-    width: 100%; padding: 14px; border: 2px solid var(--green);
-    border-radius: var(--radius); font-size: 14px; margin: 8px 0 16px;
-    outline: none;
-  }
-  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-soft); }
-  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
-
-  .loader { text-align: center; padding: 32px; color: var(--text-soft); font-size: 14px; }
-
-  .section-title {
-    font-size: 13px; font-weight: 700; color: var(--text-soft);
-    text-transform: uppercase; letter-spacing: 0.8px;
-    margin-bottom: 10px; margin-top: 4px;
-  }
-
-
-  /* ── INSTALL BANNER ── */
-  .install-banner {
-    display: none; position: fixed; bottom: 76px; left: 12px; right: 12px;
-    background: var(--green); color: white; border-radius: var(--radius);
-    padding: 12px 16px; z-index: 150; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    flex-direction: row; align-items: center; gap: 10px;
-  }
-  .install-banner.show { display: flex; }
-  .install-banner-text { flex: 1; font-size: 13px; line-height: 1.4; }
-  .install-banner-text b { font-size: 14px; }
-  .install-banner-btns { display: flex; gap: 8px; flex-shrink: 0; }
-  .install-btn { padding: 7px 14px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; }
-  .install-btn-yes { background: white; color: var(--green); }
-  .install-btn-no  { background: rgba(255,255,255,0.2); color: white; }
-
-
-  /* ── LOGIN SCREEN ── */
-  .login-screen {
-    display: none; position: fixed; inset: 0;
-    background: linear-gradient(160deg, #1B5E20 0%, #2E7D32 60%, #43A047 100%);
-    z-index: 998; padding: 0; align-items: center; justify-content: center;
-  }
-  .login-screen.open { display: flex; }
-  .login-box {
-    background: white; border-radius: 24px; padding: 36px 28px;
-    width: 100%; max-width: 360px; margin: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  }
-  .login-logo { font-size: 52px; text-align: center; margin-bottom: 8px; }
-  .login-title { font-size: 21px; font-weight: 800; color: var(--green); text-align: center; }
-  .login-sub { font-size: 13px; color: var(--text-soft); text-align: center; margin-bottom: 28px; }
-  .role-tabs { display: flex; background: var(--grey); border-radius: 12px; padding: 4px; margin-bottom: 20px; }
-  .role-tab {
-    flex: 1; text-align: center; padding: 10px; border-radius: 9px;
-    font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-soft);
-    transition: all 0.2s;
-  }
-  .role-tab.active { background: var(--green); color: white; box-shadow: 0 2px 8px rgba(27,94,32,0.3); }
-  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 24px 0; }
-  .pin-dot {
-    width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--green-mid);
-    transition: all 0.15s;
-  }
-  .pin-dot.filled { background: var(--green); }
-  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .pin-key {
-    aspect-ratio: 1; border: none; background: var(--grey);
-    border-radius: 14px; font-size: 20px; font-weight: 700; color: var(--text);
-    cursor: pointer; transition: background 0.1s;
-  }
-  .pin-key:active { background: var(--green-lite); }
-  .pin-key.action { background: none; color: var(--text-soft); font-size: 14px; }
-  .login-error { color: var(--red); font-size: 12px; text-align: center; height: 16px; margin-top: 8px; }
-  .role-badge {
-    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
-    background: rgba(255,255,255,0.25); color: white; margin-left: 8px;
-  }
-
-
-  /* ── ROLE-BASED VISIBILITY (Staff cannot edit/delete) ── */
-  body.role-staff .btn-edit,
-  body.role-staff .btn-delete,
-  body.role-staff #playerModal .btn-edit,
-  body.role-staff [data-admin-only="true"] {
-    display: none !important;
-  }
-  body.role-staff .booking-actions .btn-whatsapp {
-    border-right: none;
-  }
-
-
-  /* ── COMMUNITY LEDGER ── */
-  .match-card {
-    background: white; border-radius: var(--radius);
-    box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden;
-  }
-  .match-header {
-    background: linear-gradient(135deg, #1565C0, #1976D2);
-    padding: 12px 16px; color: white;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .match-header-left h3 { font-size: 15px; font-weight: 800; }
-  .match-header-left p  { font-size: 11px; opacity: 0.85; margin-top: 2px; }
-  .match-summary {
-    display: flex; gap: 0;
-    border-bottom: 1px solid #F0F0F0;
-  }
-  .match-stat {
-    flex: 1; text-align: center; padding: 10px 4px;
-    border-right: 1px solid #F0F0F0;
-  }
-  .match-stat:last-child { border-right: none; }
-  .match-stat-val   { font-size: 15px; font-weight: 800; color: var(--green); }
-  .match-stat-label { font-size: 10px; color: var(--text-soft); margin-top: 2px; }
-  .match-stat-val.due { color: var(--orange); }
-  .match-stat-val.blue { color: #1565C0; }
-
-  .player-ledger-row {
-    display: flex; align-items: center; padding: 10px 14px;
-    border-bottom: 1px solid #F5F5F5; gap: 10px;
-  }
-  .player-ledger-row:last-child { border-bottom: none; }
-  .player-ledger-avatar {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: #E3F2FD; color: #1565C0;
-    font-size: 14px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .player-ledger-name  { font-size: 13px; font-weight: 700; flex: 1; }
-  .player-ledger-phone { font-size: 11px; color: var(--text-soft); }
-  .player-ledger-amounts { text-align: right; }
-  .player-ledger-due   { font-size: 13px; font-weight: 800; color: var(--orange); }
-  .player-ledger-paid  { font-size: 11px; color: var(--green); }
-  .player-ledger-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  .ledger-btn {
-    padding: 5px 10px; border-radius: 8px; border: none;
-    font-size: 11px; font-weight: 700; cursor: pointer;
-  }
-  .ledger-btn-wa   { background: #E8F5E9; color: #25D366; }
-  .ledger-btn-pay  { background: var(--green-lite); color: var(--green); }
-  .ledger-btn-edit { background: #E3F2FD; color: #1565C0; }
-
-  .match-actions {
-    display: flex; border-top: 1px solid #F0F0F0;
-  }
-  .match-actions button {
-    flex: 1; padding: 10px; border: none; background: none;
-    font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-soft);
-    border-right: 1px solid #F0F0F0;
-  }
-  .match-actions button:last-child { border-right: none; }
-  .match-actions button:hover { background: var(--grey); }
-
-  .community-stats {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px; margin-bottom: 12px;
-  }
-  .community-stat {
-    background: white; border-radius: var(--radius);
-    padding: 12px 8px; box-shadow: var(--shadow); text-align: center;
-  }
-  .community-stat-val   { font-size: 18px; font-weight: 800; color: #1565C0; }
-  .community-stat-label { font-size: 10px; color: var(--text-soft); margin-top: 2px; }
-
-  .due-chip {
-    font-size: 11px; background: var(--orange-lite); color: var(--orange);
-    border-radius: 10px; padding: 2px 8px; font-weight: 600;
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1B5E20;--green-mid:#2E7D32;--green-lite:#E8F5E9;--green-acc:#43A047;
+  --orange:#E65100;--orange-lite:#FFF3E0;--red:#C62828;--red-lite:#FFEBEE;
+  --grey:#F5F5F5;--grey-mid:#9E9E9E;--text:#212121;--text-soft:#616161;
+  --white:#FFFFFF;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,0.10);
+  --blue:#1565C0;--blue-lite:#E3F2FD;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F0;color:var(--text);min-height:100vh;padding-bottom:80px}
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--green) 0%,var(--green-mid) 100%);color:white;padding:14px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:17px;font-weight:700}
+.header p{font-size:11px;opacity:0.8;margin-top:2px}
+.hdr-btns{display:flex;gap:6px}
+.hdr-btn{background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer}
+.role-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,0.25);color:white;margin-left:6px}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;box-shadow:0 -2px 12px rgba(0,0,0,0.12);z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 6px;border:none;background:none;cursor:pointer;font-size:10px;color:var(--grey-mid);gap:2px}
+.nav-btn.active{color:var(--green)}
+.nav-btn .icon{font-size:20px}
+/* PAGES */
+.page{display:none;padding:14px}
+.page.active{display:block}
+/* FAB */
+.fab{position:fixed;bottom:74px;right:18px;width:54px;height:54px;border-radius:50%;background:var(--green);color:white;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(27,94,32,0.4);display:flex;align-items:center;justify-content:center;z-index:99}
+/* CARDS */
+.card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:10px}
+.section-title{font-size:12px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;margin-top:4px}
+/* STATS */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-card{background:white;border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
+.stat-val{font-size:22px;font-weight:800;color:var(--green)}
+.stat-val.orange{color:var(--orange)}
+.stat-val.blue{color:var(--blue)}
+.stat-label{font-size:11px;color:var(--text-soft);margin-top:2px}
+/* BOOKING CARD */
+.bk-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
+.bk-top{padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between}
+.bk-sport{font-size:11px;font-weight:700;color:white;background:var(--green-mid);border-radius:20px;padding:3px 10px;display:inline-block}
+.bk-sport.fb{background:var(--blue)}
+.bk-name{font-size:15px;font-weight:700;margin-top:4px}
+.bk-time{font-size:12px;color:var(--text-soft);margin-top:2px}
+.bk-meta{padding:0 14px 10px;display:flex;justify-content:space-between;align-items:center}
+.bk-amount{font-size:14px;font-weight:700;color:var(--green)}
+.bk-due{font-size:12px;color:var(--orange)}
+.badge{font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px}
+.badge.paid{background:var(--green-lite);color:var(--green)}
+.badge.pending{background:var(--orange-lite);color:var(--orange)}
+.bk-actions{border-top:1px solid #F0F0F0;display:flex}
+.bk-actions button{flex:1;padding:9px;border:none;background:none;font-size:12px;cursor:pointer;font-weight:600;border-right:1px solid #F0F0F0}
+.bk-actions button:last-child{border-right:none}
+.btn-edit{color:var(--green)}
+.btn-wa{color:#25D366}
+.btn-del{color:var(--red)}
+/* FORM */
+.form-group{margin-bottom:12px}
+.form-label{font-size:12px;font-weight:600;color:var(--text-soft);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.form-label .lbl-link{color:var(--green);font-size:11px;cursor:pointer;font-weight:700}
+.form-input,.form-select{width:100%;padding:10px 12px;border:1.5px solid #E0E0E0;border-radius:10px;font-size:15px;color:var(--text);background:white;outline:none}
+.form-input:focus,.form-select:focus{border-color:var(--green-acc)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;padding:13px;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+.btn-primary{background:var(--green);color:white}
+.btn-secondary{background:var(--grey);color:var(--text)}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:white;width:100%;border-radius:20px 20px 0 0;max-height:92vh;overflow-y:auto;padding:20px 18px 32px;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-title{font-size:17px;font-weight:800;color:var(--green)}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--grey);font-size:18px;cursor:pointer}
+/* LOGIN */
+.login-screen{display:none;position:fixed;inset:0;background:linear-gradient(160deg,#1B5E20 0%,#2E7D32 60%,#43A047 100%);z-index:998;align-items:center;justify-content:center}
+.login-screen.open{display:flex}
+.login-box{background:white;border-radius:24px;padding:32px 24px;width:100%;max-width:340px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.login-logo{font-size:48px;text-align:center;margin-bottom:6px}
+.login-title{font-size:20px;font-weight:800;color:var(--green);text-align:center}
+.login-sub{font-size:13px;color:var(--text-soft);text-align:center;margin-bottom:20px}
+.role-tabs{display:flex;background:var(--grey);border-radius:12px;padding:4px;margin-bottom:16px}
+.role-tab{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text-soft)}
+.role-tab.active{background:var(--green);color:white}
+.pin-dots{display:flex;justify-content:center;gap:14px;margin:18px 0}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--green-mid)}
+.pin-dot.filled{background:var(--green)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pin-key{aspect-ratio:1;border:none;background:var(--grey);border-radius:14px;font-size:20px;font-weight:700;color:var(--text);cursor:pointer}
+.pin-key:active{background:var(--green-lite)}
+.pin-key.action{background:none;color:var(--text-soft);font-size:13px}
+.login-error{color:var(--red);font-size:12px;text-align:center;height:16px;margin-top:6px}
+/* SETUP */
+.setup-screen{display:none;position:fixed;inset:0;background:white;z-index:999;padding:28px 20px;overflow-y:auto}
+.setup-screen.open{display:block}
+.setup-step{background:var(--green-lite);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.setup-step-num{font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px}
+.setup-step-text{font-size:13px;line-height:1.5}
+.setup-url-input{width:100%;padding:12px;border:2px solid var(--green);border-radius:var(--radius);font-size:14px;margin:8px 0 14px;outline:none}
+/* CHIPS */
+.chips{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px}
+.chip{flex-shrink:0;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #E0E0E0;background:white;cursor:pointer;color:var(--text-soft)}
+.chip.active{background:var(--green);color:white;border-color:var(--green)}
+/* SEARCH */
+.search-box{background:white;border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);margin-bottom:10px}
+.search-box input{border:none;outline:none;font-size:14px;width:100%;background:transparent}
+/* PLAYER */
+.player-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:12px;margin-bottom:10px}
+.player-top{display:flex;align-items:center;gap:10px}
+.player-avatar{width:40px;height:40px;border-radius:50%;background:var(--blue-lite);color:var(--blue);font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.player-name{font-size:14px;font-weight:700}
+.player-phone{font-size:12px;color:var(--text-soft)}
+.player-sport{font-size:11px;color:white;background:var(--green-acc);border-radius:10px;padding:2px 8px;display:inline-block;margin-top:3px}
+.player-actions{display:flex;gap:8px;border-top:1px solid #F0F0F0;padding-top:10px;margin-top:10px}
+.player-actions button{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+.p-edit-btn{border:1.5px solid var(--green);background:white;color:var(--green)}
+.p-del-btn{border:1.5px solid var(--red);background:white;color:var(--red)}
+/* COMMUNITY */
+.match-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.match-hdr{background:linear-gradient(135deg,#1565C0,#1976D2);padding:12px 14px;color:white;display:flex;justify-content:space-between;align-items:center}
+.match-hdr h3{font-size:14px;font-weight:800}
+.match-hdr p{font-size:11px;opacity:0.85;margin-top:2px}
+.match-hdr-count{background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700}
+.match-summary{display:flex;border-bottom:1px solid #F0F0F0}
+.match-stat{flex:1;text-align:center;padding:9px 4px;border-right:1px solid #F0F0F0}
+.match-stat:last-child{border-right:none}
+.ms-val{font-size:14px;font-weight:800;color:var(--green)}
+.ms-val.blue{color:var(--blue)}
+.ms-val.orange{color:var(--orange)}
+.ms-lbl{font-size:10px;color:var(--text-soft);margin-top:2px}
+.pl-row{display:flex;align-items:center;padding:9px 12px;border-bottom:1px solid #F5F5F5;gap:8px}
+.pl-row:last-child{border-bottom:none}
+.pl-av{width:32px;height:32px;border-radius:50%;background:var(--blue-lite);color:var(--blue);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pl-name{font-size:13px;font-weight:700;flex:1}
+.pl-phone{font-size:11px;color:var(--text-soft)}
+.pl-due{font-size:13px;font-weight:800;color:var(--orange)}
+.pl-paid-lbl{font-size:11px;color:var(--green)}
+.pl-btns{display:flex;gap:5px;flex-shrink:0}
+.pl-btn{padding:5px 8px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer}
+.pl-btn-wa{background:#E8F5E9;color:#25D366}
+.pl-btn-pay{background:var(--green-lite);color:var(--green)}
+.pl-btn-edit{background:var(--blue-lite);color:var(--blue)}
+.match-actions{display:flex;border-top:1px solid #F0F0F0}
+.match-actions button{flex:1;padding:9px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-soft);border-right:1px solid #F0F0F0}
+.match-actions button:last-child{border-right:none}
+.comm-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.comm-stat{background:white;border-radius:var(--radius);padding:10px 6px;box-shadow:var(--shadow);text-align:center}
+.cs-val{font-size:17px;font-weight:800;color:var(--blue)}
+.cs-lbl{font-size:10px;color:var(--text-soft);margin-top:2px}
+/* TOAST */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#323232;color:white;padding:10px 20px;border-radius:24px;font-size:13px;z-index:300;opacity:0;transition:opacity 0.3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1}
+/* INSTALL MODAL */
+.install-step{background:var(--green-lite);border-radius:12px;padding:12px;margin-bottom:10px}
+.install-step h4{font-size:13px;font-weight:800;color:var(--green);margin-bottom:6px}
+.install-step p{font-size:13px;line-height:1.9}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-soft)}
+.empty-state .ei{font-size:44px;margin-bottom:10px}
+.loader{text-align:center;padding:30px;color:var(--text-soft);font-size:14px}
+body.role-staff [data-admin]{ display:none !important }
 </style>
 </head>
-<!-- ══ LOGIN SCREEN ══════════════════════════════════════════════ -->
-<div class="login-screen" id="loginScreen">
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen open" id="loginScreen">
   <div class="login-box">
     <div class="login-logo">🏟️</div>
     <div class="login-title">Urban Sports Arena</div>
     <div class="login-sub">Enter your PIN to continue</div>
-
     <div class="role-tabs">
       <div class="role-tab active" id="tabAdmin" onclick="selectRole('admin')">👑 Admin</div>
       <div class="role-tab" id="tabStaff" onclick="selectRole('staff')">👤 Staff</div>
     </div>
-
     <div class="pin-dots" id="pinDots">
-      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
     <div class="login-error" id="loginError"></div>
-
     <div class="pin-pad">
       <button class="pin-key" onclick="pinPress('1')">1</button>
       <button class="pin-key" onclick="pinPress('2')">2</button>
@@ -460,119 +203,157 @@
       <button class="pin-key" onclick="pinPress('9')">9</button>
       <button class="pin-key action" onclick="pinClear()">Clear</button>
       <button class="pin-key" onclick="pinPress('0')">0</button>
-      <button class="pin-key action" onclick="pinBackspace()">⌫</button>
+      <button class="pin-key action" onclick="pinBack()">⌫</button>
     </div>
   </div>
 </div>
 
-<body>
-
-<!-- ══ SETUP SCREEN ══════════════════════════════════════════════ -->
+<!-- SETUP -->
 <div class="setup-screen" id="setupScreen">
-  <div class="setup-logo">🏟️</div>
-  <div class="setup-title">Urban Sports Arena</div>
-  <div class="setup-sub">One-time setup — do this once on your laptop!</div>
-
-  <div class="setup-step">
-    <div class="setup-step-num">STEP 1</div>
-    <div class="setup-step-text">Open Google Apps Script, paste the full code from <b>UrbanSportsArena_Backend.gs</b> and save.</div>
-  </div>
-  <div class="setup-step">
-    <div class="setup-step-num">STEP 2</div>
-    <div class="setup-step-text"><b>Deploy</b> → <b>New Deployment</b> → Type: <b>Web App</b> → Execute as: <b>Me</b> → Access: <b>Anyone</b> → Deploy</div>
-  </div>
-  <div class="setup-step">
-    <div class="setup-step-num">STEP 3</div>
-    <div class="setup-step-text">After deploying, copy the <b>Web App URL</b> and paste it below:</div>
-  </div>
-
-  <input class="setup-url-input" id="setupUrl" placeholder="https://script.google.com/macros/s/..." />
-  <button class="btn btn-primary" onclick="saveSetup()">✅ Setup Complete — Launch App</button>
-
-  <div style="margin-top:20px; padding:14px; background:#FFF9C4; border-radius:12px; font-size:12px; color:#5D4037; line-height:1.6;">
-    ⚠️ <b>Note:</b> When deploying, set "Execute as: Me" and "Access: Anyone". You will need to allow permissions via your Google account.
+  <div style="font-size:40px;text-align:center;margin-bottom:8px">🏟️</div>
+  <div style="font-size:20px;font-weight:800;color:var(--green);text-align:center;margin-bottom:4px">Urban Sports Arena</div>
+  <div style="font-size:13px;color:var(--text-soft);text-align:center;margin-bottom:24px">One-time setup</div>
+  <div class="setup-step"><div class="setup-step-num">STEP 1</div><div class="setup-step-text">Open Google Apps Script → paste the Backend code → Save</div></div>
+  <div class="setup-step"><div class="setup-step-num">STEP 2</div><div class="setup-step-text">Deploy → New Deployment → Web App → Execute as: Me → Access: Anyone → Deploy</div></div>
+  <div class="setup-step"><div class="setup-step-num">STEP 3</div><div class="setup-step-text">Copy the Web App URL and paste below:</div></div>
+  <input class="setup-url-input" id="setupUrl" placeholder="https://script.google.com/macros/s/..."/>
+  <button class="btn btn-primary" onclick="saveSetup()">✅ Save & Launch App</button>
+  <div style="margin-top:14px;padding:12px;background:#FFF9C4;border-radius:10px;font-size:12px;color:#5D4037;line-height:1.6">
+    ⚠️ Set "Execute as: Me" and "Access: Anyone" when deploying.
   </div>
 </div>
 
-<!-- ══ HEADER ════════════════════════════════════════════════════ -->
+<!-- INSTALL MODAL -->
+<div class="modal-overlay" id="installModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📱 Add to Home Screen</div>
+      <button class="modal-close" onclick="closeModal('installModal')">✕</button>
+    </div>
+    <div class="install-step">
+      <h4>🤖 Android (Chrome)</h4>
+      <p>1️⃣ Open in Chrome<br/>2️⃣ Tap 3-dot menu ⋮<br/>3️⃣ Tap "Add to Home screen"<br/>4️⃣ Tap Add ✅</p>
+    </div>
+    <div class="install-step" style="background:var(--blue-lite)">
+      <h4 style="color:var(--blue)">🍎 iPhone (Safari)</h4>
+      <p>1️⃣ Open in Safari<br/>2️⃣ Tap Share 📤 at bottom<br/>3️⃣ Tap "Add to Home Screen"<br/>4️⃣ Tap Add ✅</p>
+    </div>
+    <button class="btn btn-primary" onclick="closeModal('installModal')">Got it!</button>
+  </div>
+</div>
+
+<!-- HEADER -->
 <div class="header">
   <div class="header-top">
     <div>
       <h1>🏟️ Urban Sports Arena <span class="role-badge" id="roleBadge"></span></h1>
       <p>Jaipur, Rajasthan</p>
     </div>
-    <div style="display:flex;gap:6px;">
-    <button onclick="showInstallGuide()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">📲 Install</button>
-    <button onclick="showSetup()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">⚙️</button>
-    <button onclick="logout()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">🚪</button>
-  </div>
-  </div>
-</div>
-
-<!-- ══ PAGES ═════════════════════════════════════════════════════ -->
-
-<!-- Dashboard -->
-<div class="page active" id="page-dashboard">
-  <div id="dashContent">
-    <div class="loader">Loading...</div>
+    <div class="hdr-btns">
+      <button class="hdr-btn" onclick="showInstallModal()">📲</button>
+      <button class="hdr-btn" onclick="showSetup()">⚙️</button>
+      <button class="hdr-btn" onclick="doLogout()">🚪</button>
+    </div>
   </div>
 </div>
 
-<!-- Bookings -->
+<!-- PAGES -->
+<div class="page active" id="page-dashboard"><div id="dashContent"><div class="loader">Loading...</div></div></div>
 <div class="page" id="page-bookings">
-  <div class="search-box">
-    <span>🔍</span>
-    <input type="text" id="searchInput" placeholder="Search by name or phone..." oninput="renderBookings()"/>
-  </div>
+  <div class="search-box">🔍 <input id="searchInput" placeholder="Search by name or phone..." oninput="renderBookings()"/></div>
   <div class="chips">
     <div class="chip active" onclick="setFilter('all',this)">All</div>
     <div class="chip" onclick="setFilter('today',this)">Today</div>
     <div class="chip" onclick="setFilter('Pending',this)">Pending</div>
     <div class="chip" onclick="setFilter('Paid',this)">Paid</div>
-    <div class="chip" onclick="setFilter('Cricket',this)">Cricket 🏏</div>
-    <div class="chip" onclick="setFilter('Football',this)">Football ⚽</div>
+    <div class="chip" onclick="setFilter('Cricket',this)">🏏 Cricket</div>
+    <div class="chip" onclick="setFilter('Football',this)">⚽ Football</div>
   </div>
   <div id="bookingsList"><div class="loader">Loading...</div></div>
 </div>
+<div class="page" id="page-community"><div id="communityContent"><div class="loader">Loading...</div></div></div>
+<div class="page" id="page-payments"><div id="paymentsContent"><div class="loader">Loading...</div></div></div>
+<div class="page" id="page-players"><div id="playersList"><div class="loader">Loading...</div></div></div>
 
-<!-- Players -->
-<div class="page" id="page-players">
-  <div id="playersList"><div class="loader">Loading...</div></div>
-</div>
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="onFab()">+</button>
 
-<!-- Payments -->
-<!-- Community Ledger Page -->
-<div class="page" id="page-community">
-  <div id="communityContent"><div class="loader">Loading...</div></div>
-</div>
-
-<div class="page" id="page-payments">
-  <div id="paymentsContent"><div class="loader">Loading...</div></div>
-</div>
-
-<!-- ══ FAB ═══════════════════════════════════════════════════════ -->
-<button class="fab" id="fabBtn" onclick="openAddModal()">+</button>
-
-<!-- ══ BOTTOM NAV ════════════════════════════════════════════════ -->
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <button class="nav-btn active" onclick="showPage('dashboard',this)">
-    <span class="icon">🏠</span>Home
-  </button>
-  <button class="nav-btn" onclick="showPage('bookings',this)">
-    <span class="icon">📅</span>Bookings
-  </button>
-  <button class="nav-btn" onclick="showPage('community',this)">
-    <span class="icon">⚽</span>Community
-  </button>
-  <button class="nav-btn" onclick="showPage('payments',this)">
-    <span class="icon">💰</span>Payments
-  </button>
-  <button class="nav-btn" onclick="showPage('players',this)">
-    <span class="icon">👥</span>Players
-  </button>
+  <button class="nav-btn active" onclick="showPage('dashboard',this)"><span class="icon">🏠</span>Home</button>
+  <button class="nav-btn" onclick="showPage('bookings',this)"><span class="icon">📅</span>Bookings</button>
+  <button class="nav-btn" onclick="showPage('community',this)"><span class="icon">⚽</span>Community</button>
+  <button class="nav-btn" onclick="showPage('payments',this)"><span class="icon">💰</span>Payments</button>
+  <button class="nav-btn" onclick="showPage('players',this)"><span class="icon">👥</span>Players</button>
 </div>
 
-<!-- ══ ADD MATCH MODAL ══════════════════════════════════════════ -->
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="bkModalTitle">New Booking</div>
+      <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
+    </div>
+    <input type="hidden" id="bkEditId"/>
+    <div class="form-group">
+      <label class="form-label">Sport *</label>
+      <select class="form-select" id="bkSport">
+        <option value="">-- Select --</option>
+        <option value="Cricket">🏏 Cricket</option>
+        <option value="Football">⚽ Football</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date *</label>
+      <input class="form-input" type="date" id="bkDate"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Start *</label><input class="form-input" type="time" id="bkStart"/></div>
+      <div class="form-group"><label class="form-label">End *</label><input class="form-input" type="time" id="bkEnd"/></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Customer * <span class="lbl-link" onclick="openPlayerModal()">+ Add Player</span></label>
+      <select class="form-select" id="bkCustomer" onchange="onCustomerChange()">
+        <option value="">-- Select Player --</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="bkPhone" placeholder="Mobile number"/></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Total ₹ *</label><input class="form-input" type="number" id="bkTotal" oninput="calcDue()"/></div>
+      <div class="form-group"><label class="form-label">Advance ₹</label><input class="form-input" type="number" id="bkAdvance" value="0" oninput="calcDue()"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Due ₹</label><input class="form-input" type="number" id="bkDue" readonly style="background:#F5F5F5"/></div>
+    <div class="form-group">
+      <label class="form-label">Status *</label>
+      <select class="form-select" id="bkStatus"><option value="Pending">⏳ Pending</option><option value="Paid">✅ Paid</option></select>
+    </div>
+    <button class="btn btn-primary" id="bkSubmitBtn" onclick="submitBooking()">📅 Save Booking + Calendar Sync</button>
+  </div>
+</div>
+
+<!-- PLAYER MODAL -->
+<div class="modal-overlay" id="playerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="plModalTitle">Add New Player</div>
+      <button class="modal-close" onclick="closeModal('playerModal')">✕</button>
+    </div>
+    <input type="hidden" id="plEditId"/>
+    <div class="form-group"><label class="form-label">Name *</label><input class="form-input" type="text" id="plName" placeholder="Player name"/></div>
+    <div class="form-group"><label class="form-label">Phone *</label><input class="form-input" type="tel" id="plPhone" placeholder="Mobile number"/></div>
+    <div class="form-group">
+      <label class="form-label">Sport</label>
+      <select class="form-select" id="plSport"><option value="Cricket">🏏 Cricket</option><option value="Football">⚽ Football</option><option value="Both">Both</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-select" id="plType"><option value="Walk-in">Walk-in</option><option value="Regular">Regular</option><option value="Monthly">Monthly</option><option value="Academy">Academy</option></select>
+    </div>
+    <button class="btn btn-primary" id="plSubmitBtn" onclick="submitPlayer()">✅ Save Player</button>
+  </div>
+</div>
+
+<!-- MATCH MODAL -->
 <div class="modal-overlay" id="matchModal">
   <div class="modal">
     <div class="modal-header">
@@ -582,1322 +363,716 @@
     <input type="hidden" id="mEditId"/>
     <div class="form-group">
       <label class="form-label">Sport *</label>
-      <select class="form-select" id="mSport">
-        <option value="Football">⚽ Football</option>
-        <option value="Cricket">🏏 Cricket</option>
-      </select>
+      <select class="form-select" id="mSport"><option value="Football">⚽ Football</option><option value="Cricket">🏏 Cricket</option></select>
     </div>
-    <div class="form-group">
-      <label class="form-label">Match Date *</label>
-      <input class="form-input" type="date" id="mDate"/>
-    </div>
+    <div class="form-group"><label class="form-label">Date *</label><input class="form-input" type="date" id="mDate"/></div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Start Time</label>
-        <input class="form-input" type="time" id="mStart" value="06:00"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Time</label>
-        <input class="form-input" type="time" id="mEnd" value="07:00"/>
-      </div>
+      <div class="form-group"><label class="form-label">Start</label><input class="form-input" type="time" id="mStart" value="06:00"/></div>
+      <div class="form-group"><label class="form-label">End</label><input class="form-input" type="time" id="mEnd" value="07:00"/></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Total Match Cost ₹ *</label>
-      <input class="form-input" type="number" id="mTotalCost" placeholder="e.g. 2800" oninput="calcPerHead()"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <input class="form-input" type="text" id="mNotes" placeholder="e.g. 7-a-side, friendly"/>
-    </div>
-    <button class="btn btn-primary" onclick="submitMatch()" id="matchSubmitBtn">✅ Create Match</button>
+    <div class="form-group"><label class="form-label">Total Cost ₹</label><input class="form-input" type="number" id="mCost" placeholder="e.g. 2800"/></div>
+    <div class="form-group"><label class="form-label">Notes</label><input class="form-input" type="text" id="mNotes" placeholder="e.g. 7-a-side"/></div>
+    <button class="btn btn-primary" id="mSubmitBtn" onclick="submitMatch()">✅ Create Match</button>
   </div>
 </div>
 
-<!-- ══ ADD PLAYER TO MATCH MODAL ════════════════════════════════ -->
-<div class="modal-overlay" id="matchPlayerModal">
+<!-- MATCH PLAYER MODAL -->
+<div class="modal-overlay" id="mpModal">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="mpModalTitle">Add Player to Match</div>
-      <button class="modal-close" onclick="closeModal('matchPlayerModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('mpModal')">✕</button>
     </div>
     <input type="hidden" id="mpMatchId"/>
     <input type="hidden" id="mpEntryId"/>
     <div class="form-group">
-      <label class="form-label" style="display:flex;justify-content:space-between;">
-        Player *
-        <span onclick="openQuickAddPlayer()" style="color:var(--green);font-size:11px;cursor:pointer;font-weight:700;">+ New Player</span>
-      </label>
-      <select class="form-select" id="mpPlayer" onchange="onMpPlayerSelect()">
-        <option value="">-- Select Player --</option>
-      </select>
+      <label class="form-label">Player * <span class="lbl-link" onclick="openPlayerModal()">+ New</span></label>
+      <select class="form-select" id="mpPlayer" onchange="onMpPlayerChange()"><option value="">-- Select --</option></select>
     </div>
-    <div class="form-group">
-      <label class="form-label">Phone</label>
-      <input class="form-input" type="tel" id="mpPhone" placeholder="Auto-filled from player"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Amount Due ₹ *</label>
-      <input class="form-input" type="number" id="mpDue" placeholder="Amount this player owes"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Advance Paid ₹</label>
-      <input class="form-input" type="number" id="mpAdvance" placeholder="0" value="0"/>
-    </div>
+    <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="mpPhone"/></div>
+    <div class="form-group"><label class="form-label">Amount Due ₹ *</label><input class="form-input" type="number" id="mpDue" placeholder="Amount this player owes"/></div>
+    <div class="form-group"><label class="form-label">Advance Paid ₹</label><input class="form-input" type="number" id="mpAdvance" value="0"/></div>
     <div class="form-group">
       <label class="form-label">Status</label>
-      <select class="form-select" id="mpStatus">
-        <option value="Pending">⏳ Pending</option>
-        <option value="Paid">✅ Paid</option>
-      </select>
+      <select class="form-select" id="mpStatus"><option value="Pending">⏳ Pending</option><option value="Paid">✅ Paid</option></select>
     </div>
-    <button class="btn btn-primary" onclick="submitMatchPlayer()" id="mpSubmitBtn">✅ Add Player</button>
+    <button class="btn btn-primary" id="mpSubmitBtn" onclick="submitMatchPlayer()">✅ Add Player</button>
   </div>
 </div>
 
-<!-- ══ BOOKING MODAL ═════════════════════════════════════════════ -->
-<div class="modal-overlay" id="bookingModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle">New Booking</div>
-      <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
-    </div>
-
-    <input type="hidden" id="editId"/>
-
-    <div class="form-group">
-      <label class="form-label">Sport *</label>
-      <select class="form-select" id="fSport">
-        <option value="">-- Select --</option>
-        <option value="Cricket">🏏 Cricket</option>
-        <option value="Football">⚽ Football</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Date *</label>
-      <input class="form-input" type="date" id="fDate"/>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Start Time *</label>
-        <input class="form-input" type="time" id="fStart"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Time *</label>
-        <input class="form-input" type="time" id="fEnd"/>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-        Customer Name *
-        <span onclick="openQuickAddPlayer()" style="color:var(--green);font-size:11px;cursor:pointer;font-weight:700;">+ Add New Player</span>
-      </label>
-      <select class="form-select" id="fCustomer" onchange="onCustomerSelect()">
-        <option value="">-- Select Player --</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Phone</label>
-      <input class="form-input" type="tel" id="fPhone" placeholder="10 digit mobile number"/>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Total ₹ *</label>
-        <input class="form-input" type="number" id="fTotal" placeholder="1000" oninput="calcDue()"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Advance ₹</label>
-        <input class="form-input" type="number" id="fAdvance" placeholder="0" oninput="calcDue()"/>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Due ₹</label>
-      <input class="form-input" type="number" id="fDue" placeholder="Auto" readonly style="background:#F5F5F5;"/>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Status *</label>
-      <select class="form-select" id="fStatus">
-        <option value="Pending">⏳ Pending</option>
-        <option value="Paid">✅ Paid</option>
-      </select>
-    </div>
-
-    <button class="btn btn-primary" onclick="submitBooking()" id="submitBtn">
-      📅 Save Booking + Sync to Calendar
-    </button>
-  </div>
-</div>
-
-<!-- ══ PLAYER MODAL ══════════════════════════════════════════════ -->
-<div class="modal-overlay" id="playerModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="playerModalTitle">Add New Player</div>
-      <input type="hidden" id="pEditId"/>
-      <button class="modal-close" onclick="closeModal('playerModal')">✕</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Name *</label>
-      <input class="form-input" type="text" id="pName" placeholder="Player name"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Phone *</label>
-      <input class="form-input" type="tel" id="pPhone" placeholder="Mobile number"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Sport</label>
-      <select class="form-select" id="pSport">
-        <option value="Cricket">🏏 Cricket</option>
-        <option value="Football">⚽ Football</option>
-        <option value="Both">Both</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Type</label>
-      <select class="form-select" id="pType">
-        <option value="Walk-in">Walk-in</option>
-        <option value="Regular">Regular</option>
-        <option value="Monthly">Monthly</option>
-        <option value="Academy">Academy</option>
-      </select>
-    </div>
-    <button class="btn btn-primary" onclick="submitPlayer()" id="playerSubmitBtn">✅ Save Player</button>
-  </div>
-</div>
-
-<!-- Install Modal -->
-<div class="modal-overlay" id="installModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">📱 Add to Home Screen</div>
-      <button class="modal-close" onclick="closeModal('installModal')">✕</button>
-    </div>
-
-    <p style="font-size:13px;color:#616161;margin-bottom:16px;">
-      Save this app to your phone's home screen so it opens like a native app — no browser bar, full screen!
-    </p>
-
-    <!-- Android Steps -->
-    <div style="background:#E8F5E9;border-radius:12px;padding:14px;margin-bottom:12px;">
-      <div style="font-weight:800;font-size:13px;color:#1B5E20;margin-bottom:10px;">🤖 Android (Chrome)</div>
-      <div style="font-size:13px;color:#212121;line-height:2;">
-        1️⃣ Open this file in <b>Google Chrome</b><br/>
-        2️⃣ Tap the <b>3-dot menu ⋮</b> (top right)<br/>
-        3️⃣ Tap <b>"Add to Home screen"</b><br/>
-        4️⃣ Tap <b>"Add"</b> — done! ✅
-      </div>
-    </div>
-
-    <!-- iOS Steps -->
-    <div style="background:#E3F2FD;border-radius:12px;padding:14px;margin-bottom:16px;">
-      <div style="font-weight:800;font-size:13px;color:#1565C0;margin-bottom:10px;">🍎 iPhone (Safari)</div>
-      <div style="font-size:13px;color:#212121;line-height:2;">
-        1️⃣ Open this file in <b>Safari</b><br/>
-        2️⃣ Tap the <b>Share button</b> 📤 (bottom bar)<br/>
-        3️⃣ Scroll and tap <b>"Add to Home Screen"</b><br/>
-        4️⃣ Tap <b>"Add"</b> — done! ✅
-      </div>
-    </div>
-
-    <div style="background:#FFF9C4;border-radius:10px;padding:12px;font-size:12px;color:#5D4037;">
-      ⚠️ <b>Important:</b> The app must be opened from a <b>URL (hosted link)</b> for full install support on Android. If you're opening a local file, upload it to Google Drive and open via the Drive link in Chrome.
-    </div>
-
-    <div style="height:12px;"></div>
-    <button class="btn btn-primary" onclick="closeModal('installModal')">Got it!</button>
-  </div>
-</div>
-
-<!-- Toast -->
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ────────────────────────────────────────────────────────
-var API_URL    = localStorage.getItem("usa_api_url") || "";
-var bookings   = [];
-var players    = [];
-var activeFilter = "all";
-var currentPage  = "dashboard";
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+var API_URL     = localStorage.getItem('usa_api_url') || '';
+var ADMIN_PIN   = '1234';
+var STAFF_PIN   = '0000';
+var currentRole = sessionStorage.getItem('usa_role') || null;
+var currentPin  = sessionStorage.getItem('usa_pin')  || null;
+var selRole     = 'admin';
+var pinVal      = '';
+var bookings    = [];
+var players     = [];
+var matches     = [];
+var activeFilter= 'all';
+var curPage     = 'dashboard';
 
-// ── AUTH STATE ───────────────────────────────────────────────────
-var ADMIN_PIN  = "1234";
-var STAFF_PIN  = "0000";
-var selectedRole = "admin";
-var enteredPin = "";
-var currentRole = sessionStorage.getItem("usa_role") || null;
-var currentPin  = sessionStorage.getItem("usa_pin")  || null;
+// ═══════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════
+function cleanTime(v) {
+  if (!v) return '';
+  var s = String(v).trim();
+  if (s.indexOf('T') !== -1) {
+    var tp = s.split('T')[1].split(':');
+    return pad(parseInt(tp[0])) + ':' + pad(parseInt(tp[1]));
+  }
+  if (s.indexOf(':') !== -1) {
+    var pts = s.split(':');
+    return pad(parseInt(pts[0])) + ':' + pad(parseInt(pts[1]));
+  }
+  if (!isNaN(parseFloat(s))) {
+    var tm = Math.round(parseFloat(s) * 1440);
+    return pad(Math.floor(tm/60)%24) + ':' + pad(tm%60);
+  }
+  return '';
+}
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function today() { return new Date().toISOString().split('T')[0]; }
 
-function selectRole(role) {
-  selectedRole = role;
-  document.getElementById("tabAdmin").classList.toggle("active", role === "admin");
-  document.getElementById("tabStaff").classList.toggle("active", role === "staff");
+// ═══════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════
+function selectRole(r) {
+  selRole = r;
+  document.getElementById('tabAdmin').classList.toggle('active', r==='admin');
+  document.getElementById('tabStaff').classList.toggle('active', r==='staff');
   pinClear();
 }
-
-function pinPress(digit) {
-  if (enteredPin.length >= 4) return;
-  enteredPin += digit;
-  updatePinDots();
-  if (enteredPin.length === 4) checkPin();
+function pinPress(d) {
+  if (pinVal.length >= 4) return;
+  pinVal += d; updateDots();
+  if (pinVal.length === 4) setTimeout(checkPin, 100);
 }
-
-function pinBackspace() {
-  enteredPin = enteredPin.slice(0, -1);
-  updatePinDots();
-  document.getElementById("loginError").textContent = "";
+function pinBack()  { pinVal = pinVal.slice(0,-1); updateDots(); document.getElementById('loginError').textContent=''; }
+function pinClear() { pinVal = ''; updateDots(); document.getElementById('loginError').textContent=''; }
+function updateDots() {
+  document.querySelectorAll('#pinDots .pin-dot').forEach(function(d,i){ d.classList.toggle('filled', i < pinVal.length); });
 }
-
-function pinClear() {
-  enteredPin = "";
-  updatePinDots();
-  document.getElementById("loginError").textContent = "";
-}
-
-function updatePinDots() {
-  var dots = document.querySelectorAll("#pinDots .pin-dot");
-  dots.forEach(function(d, i) { d.classList.toggle("filled", i < enteredPin.length); });
-}
-
 function checkPin() {
-  var correctPin = selectedRole === "admin" ? ADMIN_PIN : STAFF_PIN;
-  if (enteredPin === correctPin) {
-    currentRole = selectedRole;
-    currentPin  = enteredPin;
-    sessionStorage.setItem("usa_role", currentRole);
-    sessionStorage.setItem("usa_pin", currentPin);
-    enterApp();
+  var correct = selRole==='admin' ? ADMIN_PIN : STAFF_PIN;
+  if (pinVal === correct) {
+    currentRole = selRole; currentPin = pinVal;
+    sessionStorage.setItem('usa_role', currentRole);
+    sessionStorage.setItem('usa_pin', currentPin);
+    document.getElementById('loginScreen').classList.remove('open');
+    applyRole();
+    if (API_URL) init(); else showSetup();
   } else {
-    document.getElementById("loginError").textContent = "❌ Wrong PIN — try again";
-    setTimeout(function() { pinClear(); }, 600);
+    document.getElementById('loginError').textContent = '❌ Wrong PIN — try again';
+    setTimeout(pinClear, 600);
   }
 }
-
-function logout() {
-  sessionStorage.removeItem("usa_role");
-  sessionStorage.removeItem("usa_pin");
-  currentRole = null;
-  currentPin  = null;
-  document.getElementById("loginScreen").classList.add("open");
+function applyRole() {
+  document.getElementById('roleBadge').textContent = currentRole==='admin' ? '👑 Admin' : '👤 Staff';
+  document.body.classList.toggle('role-staff', currentRole==='staff');
+}
+function doLogout() {
+  sessionStorage.clear();
+  currentRole = null; currentPin = null;
+  document.getElementById('loginScreen').classList.add('open');
   pinClear();
 }
 
-function enterApp() {
-  document.getElementById("loginScreen").classList.remove("open");
-  applyRoleUI();
-  if (API_URL) init();
-  else document.getElementById("setupScreen").classList.add("open");
+// ═══════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════
+function showSetup() {
+  document.getElementById('setupUrl').value = API_URL || '';
+  document.getElementById('setupScreen').classList.add('open');
 }
-
-function applyRoleUI() {
-  var badge = document.getElementById("roleBadge");
-  badge.textContent = currentRole === "admin" ? "👑 Admin" : "👤 Staff";
-  document.body.classList.toggle("role-staff", currentRole === "staff");
-}
-
-// ── SETUP ────────────────────────────────────────────────────────
 function saveSetup() {
-  var url = document.getElementById("setupUrl").value.trim();
-  if (!url.startsWith("https://script.google.com")) {
-    showToast("❌ Please enter a valid URL (must start with script.google.com)");
-    return;
-  }
-  localStorage.setItem("usa_api_url", url);
+  var url = document.getElementById('setupUrl').value.trim();
+  if (!url.startsWith('https://script.google.com')) { showToast('❌ Enter valid URL'); return; }
+  localStorage.setItem('usa_api_url', url);
   API_URL = url;
-  document.getElementById("setupScreen").classList.remove("open");
+  document.getElementById('setupScreen').classList.remove('open');
   init();
 }
+function showInstallModal() { document.getElementById('installModal').classList.add('open'); }
 
-function showSetup() {
-  document.getElementById("setupUrl").value = API_URL;
-  document.getElementById("setupScreen").classList.add("open");
-}
-
-// ── API ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════
+//  API
+// ═══════════════════════════════════════
 async function apiGet(action, params) {
-  var url = API_URL + "?action=" + action;
-  if (currentPin) url += "&pin=" + encodeURIComponent(currentPin);
-  if (params) Object.keys(params).forEach(k => url += "&" + k + "=" + encodeURIComponent(params[k]));
-  var res = await fetch(url);
-  return await res.json();
+  var url = API_URL + '?action=' + action;
+  if (currentPin) url += '&pin=' + encodeURIComponent(currentPin);
+  if (params) Object.keys(params).forEach(function(k){ url += '&' + k + '=' + encodeURIComponent(params[k]); });
+  var r = await fetch(url);
+  return await r.json();
 }
-
 async function apiPost(data) {
   if (currentPin) data.pin = currentPin;
-  var res = await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(data)
-  });
-  return await res.json();
+  var r = await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
+  return await r.json();
 }
 
-// ── INIT ─────────────────────────────────────────────────────────
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
 async function init() {
-  if (!API_URL) { document.getElementById("setupScreen").classList.add("open"); return; }
-  await Promise.all([loadBookings(), loadPlayers(), loadMatches()]);
-  renderDashboard();
-  renderBookings();
-  renderPlayers();
-  renderPayments();
-  renderCommunity();
-  setTodayDate();
-  updateCustomerDropdown();
-}
-
-async function loadBookings() {
   try {
-    var r = await apiGet("getBookings");
-    if (r.success) bookings = r.data;
-  } catch(e) { showToast("❌ Could not load bookings — check your internet"); }
+    await Promise.all([loadBookings(), loadPlayers(), loadMatches()]);
+  } catch(e) { showToast('❌ Could not load data — check internet & settings'); }
+  renderDashboard(); renderBookings(); renderPlayers(); renderPayments(); renderCommunity();
+  document.getElementById('bkDate').value = today();
+  document.getElementById('mDate').value  = today();
+  updatePlayerDropdowns();
 }
 
-async function loadPlayers() {
-  try {
-    var r = await apiGet("getPlayers");
-    if (r.success) players = r.data;
-  } catch(e) {}
-}
-
-// ── NAVIGATION ───────────────────────────────────────────────────
+// ═══════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════
 function showPage(page, btn) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById("page-" + page).classList.add("active");
-  if (btn) btn.classList.add("active");
-  currentPage = page;
-
-  var fab = document.getElementById("fabBtn");
-  if (page === "bookings")   { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openAddModal; }
-  else if (page === "players")    { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openPlayerModal; }
-  else if (page === "community")  { fab.style.display = "flex"; fab.textContent = "+"; fab.onclick = openAddMatchModal; }
-  else { fab.style.display = "none"; }
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('page-' + page).classList.add('active');
+  if (btn) btn.classList.add('active');
+  curPage = page;
+  var fab = document.getElementById('fabBtn');
+  if (page==='bookings' || page==='community' || page==='players') {
+    fab.style.display = 'flex'; fab.textContent = '+';
+  } else { fab.style.display = 'none'; }
+}
+function onFab() {
+  if (curPage==='bookings')  openBookingModal();
+  else if (curPage==='community') openMatchModal();
+  else if (curPage==='players')   openPlayerModal();
 }
 
-// ── DASHBOARD ────────────────────────────────────────────────────
+// ═══════════════════════════════════════
+//  LOAD DATA
+// ═══════════════════════════════════════
+async function loadBookings() { var r = await apiGet('getBookings'); if(r.success) bookings = r.data; }
+async function loadPlayers()  { var r = await apiGet('getPlayers');  if(r.success) players  = r.data; }
+async function loadMatches()  { var r = await apiGet('getMatches');  if(r.success) matches  = r.data; }
+async function reload()       { await Promise.all([loadBookings(),loadPlayers(),loadMatches()]); renderDashboard();renderBookings();renderPlayers();renderPayments();renderCommunity();updatePlayerDropdowns(); }
+
+// ═══════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════
 function renderDashboard() {
-  var today = new Date().toISOString().split("T")[0];
-  var todayBookings = bookings.filter(b => b.date === today);
-  var totalRevenue  = bookings.reduce((s,b) => s + (Number(b.total)||0), 0);
-  var totalCollected= bookings.reduce((s,b) => s + (Number(b.advance)||0), 0);
-  var pending       = bookings.filter(b => b.status === "Pending").length;
-
-  var upcomingToday = todayBookings.sort((a,b) => a.start > b.start ? 1 : -1);
-
-  var html = `
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-val">${todayBookings.length}</div>
-        <div class="stat-label">📅 Today's Bookings</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val">${pending}</div>
-        <div class="stat-label">⏳ Pending Payments</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val">₹${totalCollected.toLocaleString()}</div>
-        <div class="stat-label">✅ Total Collected</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val">${players.length}</div>
-        <div class="stat-label">👥 Total Players</div>
-      </div>
-    </div>
-
-    <div class="section-title">Today's Slots</div>
-  `;
-
-  if (upcomingToday.length === 0) {
-    html += `<div class="card" style="text-align:center;color:#9E9E9E;padding:24px;">No bookings today 🏖️</div>`;
-  } else {
-    upcomingToday.forEach(b => { html += bookingCardHtml(b); });
-  }
-
-  document.getElementById("dashContent").innerHTML = html;
+  var td = today();
+  var todayBk = bookings.filter(function(b){ return b.date===td; });
+  var totRev  = bookings.reduce(function(s,b){ return s+(Number(b.total)||0); }, 0);
+  var totColl = bookings.reduce(function(s,b){ return s+(Number(b.advance)||0); }, 0);
+  var pend    = bookings.filter(function(b){ return b.status==='Pending'; }).length;
+  var html = '<div class="stats-row">'
+    + '<div class="stat-card"><div class="stat-val">' + todayBk.length + '</div><div class="stat-label">📅 Today\'s Bookings</div></div>'
+    + '<div class="stat-card"><div class="stat-val orange">' + pend + '</div><div class="stat-label">⏳ Pending Payments</div></div>'
+    + '<div class="stat-card"><div class="stat-val">₹' + totColl.toLocaleString() + '</div><div class="stat-label">✅ Total Collected</div></div>'
+    + '<div class="stat-card"><div class="stat-val blue">' + players.length + '</div><div class="stat-label">👥 Total Players</div></div>'
+    + '</div>'
+    + '<div class="section-title">Today\'s Slots</div>';
+  if (!todayBk.length) html += '<div class="card" style="text-align:center;color:#9E9E9E;padding:20px">No bookings today 🏖️</div>';
+  else todayBk.sort(function(a,b){ return a.start>b.start?1:-1; }).forEach(function(b){ html += bkCardHtml(b); });
+  document.getElementById('dashContent').innerHTML = html;
 }
 
-// ── BOOKINGS ─────────────────────────────────────────────────────
+// ═══════════════════════════════════════
+//  BOOKINGS
+// ═══════════════════════════════════════
 function setFilter(f, el) {
   activeFilter = f;
-  document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-  el.classList.add("active");
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
   renderBookings();
 }
-
 function renderBookings() {
-  var search = (document.getElementById("searchInput")||{}).value||"";
-  var today  = new Date().toISOString().split("T")[0];
-  var list   = bookings.filter(b => {
-    var matchSearch = !search ||
-      b.customer.toLowerCase().includes(search.toLowerCase()) ||
-      (b.phone||"").includes(search);
-    var matchFilter =
-      activeFilter === "all" ? true :
-      activeFilter === "today" ? b.date === today :
-      activeFilter === "Cricket" ? b.sport === "Cricket" :
-      activeFilter === "Football" ? b.sport === "Football" :
-      b.status === activeFilter;
-    return matchSearch && matchFilter;
-  }).sort((a,b) => b.date > a.date ? 1 : b.date < a.date ? -1 : a.start > b.start ? 1 : -1);
-
-  var html = list.length === 0
-    ? `<div class="empty-state"><div class="icon">📭</div><p>No bookings found</p></div>`
-    : list.map(bookingCardHtml).join("");
-
-  document.getElementById("bookingsList").innerHTML = html;
+  var q = (document.getElementById('searchInput')||{}).value || '';
+  var td = today();
+  var list = bookings.filter(function(b) {
+    var ms = !q || b.customer.toLowerCase().indexOf(q.toLowerCase())!==-1 || (b.phone||'').indexOf(q)!==-1;
+    var mf = activeFilter==='all' ? true
+      : activeFilter==='today' ? b.date===td
+      : activeFilter==='Cricket' ? b.sport==='Cricket'
+      : activeFilter==='Football' ? b.sport==='Football'
+      : b.status===activeFilter;
+    return ms && mf;
+  }).sort(function(a,b){ return b.date>a.date?1:b.date<a.date?-1:a.start>b.start?1:-1; });
+  document.getElementById('bookingsList').innerHTML = list.length
+    ? list.map(bkCardHtml).join('')
+    : '<div class="empty-state"><div class="ei">📭</div><p>No bookings found</p></div>';
 }
-
-function bookingCardHtml(b) {
+function bkCardHtml(b) {
   var due = Number(b.due)||0;
-  return `
-    <div class="booking-card">
-      <div class="booking-top">
-        <div>
-          <div class="booking-sport ${b.sport==='Football'?'football':''}">${b.sport}</div>
-          <div class="booking-name">${b.customer}</div>
-          <div class="booking-time">📅 ${b.date} &nbsp; 🕐 ${cleanTime(b.start)}–${cleanTime(b.end)}</div>
-        </div>
-        <span class="badge ${b.status==='Paid'?'paid':'pending'}">${b.status}</span>
-      </div>
-      <div class="booking-meta">
-        <div>
-          <div class="booking-amount">₹${Number(b.total).toLocaleString()}</div>
-          ${due > 0 ? `<div class="booking-due">Due: ₹${due.toLocaleString()}</div>` : ''}
-        </div>
-        <div style="font-size:12px;color:#9E9E9E;">${b.phone||''}</div>
-      </div>
-      <div class="booking-actions">
-        <button class="btn-edit"      onclick="openEditModal('${b.id}')">✏️ Edit</button>
-        <button class="btn-whatsapp"  onclick="sendWhatsApp('${b.id}')">💬 WhatsApp</button>
-        <button class="btn-delete"    onclick="deleteBookingConfirm('${b.id}')">🗑️ Delete</button>
-      </div>
-    </div>`;
+  return '<div class="bk-card">'
+    + '<div class="bk-top"><div>'
+    + '<span class="bk-sport' + (b.sport==='Football'?' fb':'') + '">' + b.sport + '</span>'
+    + '<div class="bk-name">' + b.customer + '</div>'
+    + '<div class="bk-time">📅 ' + b.date + ' &nbsp; 🕐 ' + cleanTime(b.start) + '–' + cleanTime(b.end) + '</div>'
+    + '</div><span class="badge ' + (b.status==='Paid'?'paid':'pending') + '">' + b.status + '</span></div>'
+    + '<div class="bk-meta"><div><div class="bk-amount">₹' + Number(b.total).toLocaleString() + '</div>'
+    + (due>0?'<div class="bk-due">Due: ₹'+due+'</div>':'')
+    + '</div><div style="font-size:12px;color:#9E9E9E">' + (b.phone||'') + '</div></div>'
+    + '<div class="bk-actions">'
+    + '<button class="btn-edit" data-admin onclick="editBk(this)" data-id="' + b.id + '">✏️ Edit</button>'
+    + '<button class="btn-wa" onclick="sendBkWA(this)" data-id="' + b.id + '">💬 WhatsApp</button>'
+    + '<button class="btn-del" data-admin onclick="delBk(this)" data-id="' + b.id + '">🗑️ Delete</button>'
+    + '</div></div>';
 }
 
-// ── ADD / EDIT MODAL ─────────────────────────────────────────────
-function setTodayDate() {
-  var today = new Date().toISOString().split("T")[0];
-  document.getElementById("fDate").value = today;
+// ═══════════════════════════════════════
+//  BOOKING MODAL
+// ═══════════════════════════════════════
+function openBookingModal() {
+  document.getElementById('bkEditId').value = '';
+  document.getElementById('bkModalTitle').textContent = 'New Booking';
+  document.getElementById('bkSubmitBtn').textContent  = '📅 Save Booking + Calendar Sync';
+  document.getElementById('bkSport').value    = '';
+  document.getElementById('bkDate').value     = today();
+  document.getElementById('bkStart').value    = '06:00';
+  document.getElementById('bkEnd').value      = '07:00';
+  document.getElementById('bkCustomer').value = '';
+  document.getElementById('bkPhone').value    = '';
+  document.getElementById('bkTotal').value    = '';
+  document.getElementById('bkAdvance').value  = '0';
+  document.getElementById('bkDue').value      = '';
+  document.getElementById('bkStatus').value   = 'Pending';
+  document.getElementById('bookingModal').classList.add('open');
 }
-
-function calcDue() {
-  var total   = Number(document.getElementById("fTotal").value)||0;
-  var advance = Number(document.getElementById("fAdvance").value)||0;
-  document.getElementById("fDue").value = total - advance;
-}
-
-function openAddModal() {
-  document.getElementById("editId").value = "";
-  document.getElementById("modalTitle").textContent = "New Booking";
-  document.getElementById("submitBtn").textContent = "📅 Save Booking + Sync to Calendar";
-  document.getElementById("fSport").value   = "";
-  document.getElementById("fCustomer").value= "";
-  document.getElementById("fPhone").value   = "";
-  document.getElementById("fTotal").value   = "";
-  document.getElementById("fAdvance").value = "";
-  document.getElementById("fDue").value     = "";
-  document.getElementById("fStatus").value  = "Pending";
-  document.getElementById("fStart").value   = "06:00";
-  document.getElementById("fEnd").value     = "07:00";
-  setTodayDate();
-  document.getElementById("bookingModal").classList.add("open");
-}
-
-function openEditModal(id) {
-  if (currentRole !== "admin") { showToast("❌ Only Admin can edit bookings"); return; }
-  var b = bookings.find(x => x.id === id);
+function editBk(btn) {
+  if (currentRole !== 'admin') { showToast('❌ Only Admin can edit bookings'); return; }
+  var id = btn.getAttribute('data-id');
+  var b  = bookings.find(function(x){ return x.id===id; });
   if (!b) return;
-  document.getElementById("editId").value     = b.id;
-  document.getElementById("modalTitle").textContent = "Edit Booking";
-  document.getElementById("submitBtn").textContent  = "✅ Update Booking";
-  document.getElementById("fSport").value     = b.sport;
-  document.getElementById("fDate").value      = b.date;
-  document.getElementById("fStart").value     = cleanTime(b.start);
-  document.getElementById("fEnd").value       = cleanTime(b.end);
-  document.getElementById("fCustomer").value  = b.customer;
-  document.getElementById("fPhone").value     = b.phone;
-  document.getElementById("fTotal").value     = b.total;
-  document.getElementById("fAdvance").value   = b.advance;
-  document.getElementById("fDue").value       = b.due;
-  document.getElementById("fStatus").value    = b.status;
-  document.getElementById("bookingModal").classList.add("open");
+  document.getElementById('bkEditId').value   = b.id;
+  document.getElementById('bkModalTitle').textContent = 'Edit Booking';
+  document.getElementById('bkSubmitBtn').textContent  = '✅ Update Booking';
+  document.getElementById('bkSport').value    = b.sport;
+  document.getElementById('bkDate').value     = b.date;
+  document.getElementById('bkStart').value    = cleanTime(b.start);
+  document.getElementById('bkEnd').value      = cleanTime(b.end);
+  document.getElementById('bkPhone').value    = b.phone;
+  document.getElementById('bkTotal').value    = b.total;
+  document.getElementById('bkAdvance').value  = b.advance;
+  document.getElementById('bkDue').value      = b.due;
+  document.getElementById('bkStatus').value   = b.status;
+  updatePlayerDropdowns();
+  document.getElementById('bkCustomer').value = b.customer;
+  document.getElementById('bookingModal').classList.add('open');
 }
-
+function calcDue() {
+  var t = Number(document.getElementById('bkTotal').value)||0;
+  var a = Number(document.getElementById('bkAdvance').value)||0;
+  document.getElementById('bkDue').value = t-a;
+}
+function onCustomerChange() {
+  var sel = document.getElementById('bkCustomer');
+  var opt = sel.options[sel.selectedIndex];
+  if (opt) { var ph = opt.getAttribute('data-phone'); if(ph) document.getElementById('bkPhone').value = ph; }
+}
 async function submitBooking() {
-  var id       = document.getElementById("editId").value;
-  var sport    = document.getElementById("fSport").value;
-  var date     = document.getElementById("fDate").value;
-  var start    = document.getElementById("fStart").value;
-  var end      = document.getElementById("fEnd").value;
-  var customer = document.getElementById("fCustomer").value.trim();
-  var phone    = document.getElementById("fPhone").value.trim();
-  var total    = Number(document.getElementById("fTotal").value)||0;
-  var advance  = Number(document.getElementById("fAdvance").value)||0;
-  var status   = document.getElementById("fStatus").value;
-
-  if (!sport || !date || !start || !end || !customer || !total) {
-    showToast("❌ Please fill all required fields!"); return;
-  }
-
-  var btn = document.getElementById("submitBtn");
-  btn.textContent = "⏳ Saving..."; btn.disabled = true;
-
+  var editId = document.getElementById('bkEditId').value;
+  var sport  = document.getElementById('bkSport').value;
+  var date   = document.getElementById('bkDate').value;
+  var start  = document.getElementById('bkStart').value;
+  var end    = document.getElementById('bkEnd').value;
+  var cust   = document.getElementById('bkCustomer').value;
+  var phone  = document.getElementById('bkPhone').value;
+  var total  = Number(document.getElementById('bkTotal').value)||0;
+  var advance= Number(document.getElementById('bkAdvance').value)||0;
+  var status = document.getElementById('bkStatus').value;
+  if (!sport||!date||!start||!end||!cust||!total) { showToast('❌ Fill all required fields!'); return; }
+  var btn = document.getElementById('bkSubmitBtn');
+  btn.textContent = '⏳ Saving...'; btn.disabled = true;
   try {
-    var data = { action: id ? "editBooking" : "addBooking", id, sport, date, start, end, customer, phone, total, advance, status };
-    var r = await apiPost(data);
-    if (r.success) {
-      showToast(id ? "✅ Booking updated + Calendar synced!" : "✅ Booking saved + Added to Calendar!");
-      closeModal("bookingModal");
-      await loadBookings();
-      renderDashboard(); renderBookings(); renderPayments();
-    } else {
-      showToast("❌ Error: " + (r.error||"Try again"));
-    }
-  } catch(e) { showToast("❌ Network error — check your internet"); }
-
-  btn.textContent = id ? "✅ Update Booking" : "📅 Save Booking + Sync to Calendar";
+    var r = await apiPost({ action: editId?'editBooking':'addBooking', id:editId, sport, date, start, end, customer:cust, phone, total, advance, status });
+    if (r.success) { showToast(editId?'✅ Booking updated!':'✅ Booking saved + Calendar synced!'); closeModal('bookingModal'); await reload(); }
+    else showToast('❌ ' + (r.error||'Error'));
+  } catch(e) { showToast('❌ Network error'); }
+  btn.textContent = editId ? '✅ Update Booking' : '📅 Save Booking + Calendar Sync';
   btn.disabled = false;
 }
+async function delBk(btn) {
+  if (currentRole!=='admin') { showToast('❌ Only Admin can delete'); return; }
+  var id = btn.getAttribute('data-id');
+  var b  = bookings.find(function(x){ return x.id===id; });
+  if (!b || !confirm('Delete booking for ' + b.customer + '?')) return;
+  var r = await apiGet('deleteBooking', {id:id});
+  if (r.success) { showToast('🗑️ Deleted!'); await reload(); }
+  else showToast('❌ Could not delete');
+}
 
-async function deleteBookingConfirm(id) {
-  if (currentRole !== "admin") { showToast("❌ Only Admin can delete bookings"); return; }
-  var b = bookings.find(x => x.id === id);
+// ═══════════════════════════════════════
+//  WHATSAPP — BOOKING
+// ═══════════════════════════════════════
+function sendBkWA(btn) {
+  var id = btn.getAttribute('data-id');
+  var b  = bookings.find(function(x){ return x.id===id; });
   if (!b) return;
-  if (!confirm(b.customer + "'s booking — are you sure you want to delete?")) return;
-  try {
-    var r = await apiGet("deleteBooking", { id });
-    if (r.success) {
-      showToast("🗑️ Booking deleted + Removed from Calendar!");
-      await loadBookings();
-      renderDashboard(); renderBookings(); renderPayments();
-    }
-  } catch(e) { showToast("❌ Could not delete — please try again"); }
+  var due = Number(b.due)||0, adv = Number(b.advance)||0, tot = Number(b.total)||0;
+  var payLine = due>0 ? '💰 Advance Paid: Rs.'+adv+'\n⏳ Due Amount: Rs.'+due : '✅ Full Payment: Rs.'+tot+' (Paid)';
+  var msg = '🏟️ *URBAN SPORTS ARENA*\n*Booking Confirmation*\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '👤 *Name:* ' + b.customer + '\n'
+    + '🏏 *Sport:* ' + b.sport + '\n'
+    + '📅 *Date:* ' + b.date + (b.day?' ('+b.day+')':'') + '\n'
+    + '🕐 *Slot:* ' + cleanTime(b.start) + ' – ' + cleanTime(b.end) + '\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━\n'
+    + payLine + '\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '📍 Location:\nhttps://maps.app.goo.gl/kfmFcgcrfGDj1NKr9\n\n'
+    + 'Please arrive 5 minutes early.\nSee you on the field! ⚽🏏\n\n_Urban Sports Arena, Jaipur_';
+  sendWA(b.phone, msg);
 }
-
-// ── PLAYERS ─────────────────────────────────────────────────────
-function renderPlayers() {
-  var html = players.length === 0
-    ? `<div class="empty-state"><div class="icon">👥</div><p>No players yet — tap + to add one</p></div>`
-    : players.map(p => `
-      <div class="player-card" style="flex-direction:column;align-items:stretch;gap:10px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div class="player-avatar">${p.name.charAt(0).toUpperCase()}</div>
-          <div style="flex:1;">
-            <div class="player-name">${p.name}</div>
-            <div class="player-phone">📞 ${p.phone}</div>
-            <span class="player-sport">${p.sport}</span>
-            <span style="font-size:11px;color:#9E9E9E;margin-left:6px;">${p.type}</span>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;border-top:1px solid #F0F0F0;padding-top:10px;" data-admin-only="true">
-          <button onclick="openEditPlayerModal('${p.id}')" style="flex:1;padding:8px;border:1.5px solid var(--green);background:white;color:var(--green);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✏️ Edit</button>
-          <button onclick="deletePlayer('${p.id}')" style="flex:1;padding:8px;border:1.5px solid var(--red);background:white;color:var(--red);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🗑️ Delete</button>
-        </div>
-      </div>`).join("");
-  document.getElementById("playersList").innerHTML = html;
-}
-
-function updatePlayerSuggestions() { updateCustomerDropdown(); }
-
-function openPlayerModal() {
-  document.getElementById("playerModalTitle").textContent = "Add New Player";
-  document.getElementById("pEditId").value = "";
-  document.getElementById("pName").value = "";
-  document.getElementById("pPhone").value = "";
-  document.getElementById("playerSubmitBtn").textContent = "✅ Save Player";
-  document.getElementById("playerModal").classList.add("open");
-}
-
-async function submitPlayer() {
-  var editId = document.getElementById("pEditId").value;
-  var name   = document.getElementById("pName").value.trim();
-  var phone  = document.getElementById("pPhone").value.trim();
-  var sport  = document.getElementById("pSport").value;
-  var type   = document.getElementById("pType").value;
-  if (!name || !phone) { showToast("❌ Name and phone are required!"); return; }
-  try {
-    var payload = editId
-      ? { action: "editPlayer", id: editId, name, phone, sport, type }
-      : { action: "addPlayer", name, phone, sport, type };
-    var r = await apiPost(payload);
-    if (r.success) {
-      showToast(editId ? "✅ Player updated!" : "✅ Player added!");
-      closeModal("playerModal");
-      await loadPlayers();
-      renderPlayers();
-      updateCustomerDropdown();
-    }
-  } catch(e) { showToast("❌ Error saving player — try again"); }
-}
-
-// ── PAYMENTS ─────────────────────────────────────────────────────
-function renderPayments() {
-  var totalRevenue   = bookings.reduce((s,b) => s+(Number(b.total)||0), 0);
-  var totalCollected = bookings.reduce((s,b) => s+(Number(b.advance)||0), 0);
-  var totalDue       = bookings.reduce((s,b) => s+(Number(b.due)||0), 0);
-  var pendingBookings= bookings.filter(b => b.status==="Pending" && Number(b.due)>0);
-
-  var html = `
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-val">₹${totalRevenue.toLocaleString()}</div><div class="stat-label">Total Revenue</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--green-acc)">₹${totalCollected.toLocaleString()}</div><div class="stat-label">✅ Collected</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--orange)">₹${totalDue.toLocaleString()}</div><div class="stat-label">⏳ Due</div></div>
-      <div class="stat-card"><div class="stat-val">${pendingBookings.length}</div><div class="stat-label">Pending Bookings</div></div>
-    </div>
-    <div class="section-title">Due Payments</div>
-  `;
-
-  if (pendingBookings.length === 0) {
-    html += `<div class="card" style="text-align:center;padding:24px;color:#9E9E9E;">All payments cleared 🎉</div>`;
+function sendWA(phone, msg) {
+  var p = String(phone||'').replace(/[^0-9]/g,'');
+  if (p.length===10) p = '91'+p;
+  var enc = encodeURIComponent(msg);
+  if (p.length>=12) {
+    window.location.href = 'whatsapp://send?phone='+p+'&text='+enc;
+    setTimeout(function(){ window.open('https://api.whatsapp.com/send?phone='+p+'&text='+enc,'_blank'); }, 1500);
   } else {
-    pendingBookings.forEach(b => {
-      html += `
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div>
-              <div style="font-weight:700;">${b.customer}</div>
-              <div style="font-size:12px;color:#9E9E9E;">${b.date} · ${b.sport}</div>
-              <div style="font-size:12px;color:#9E9E9E;">📞 ${b.phone||''}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:800;color:var(--orange);font-size:18px;">₹${Number(b.due).toLocaleString()}</div>
-              <div style="font-size:11px;color:#9E9E9E;">Due Amount</div>
-            </div>
-          </div>
-          <button data-admin-only="true" onclick="markAsPaid('${b.id}')" style="width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
-            ✅ Mark as Fully Paid
-          </button>
-        </div>`;
-    });
+    window.location.href = 'whatsapp://send?text='+enc;
+    setTimeout(function(){ window.open('https://api.whatsapp.com/send?text='+enc,'_blank'); }, 1500);
   }
-
-  document.getElementById("paymentsContent").innerHTML = html;
 }
 
-// ── UTILS ────────────────────────────────────────────────────────
-function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+// ═══════════════════════════════════════
+//  PAYMENTS
+// ═══════════════════════════════════════
+function renderPayments() {
+  var totRev  = bookings.reduce(function(s,b){ return s+(Number(b.total)||0); }, 0);
+  var totColl = bookings.reduce(function(s,b){ return s+(Number(b.advance)||0); }, 0);
+  var totDue  = bookings.reduce(function(s,b){ return s+(Number(b.due)||0); }, 0);
+  var pending = bookings.filter(function(b){ return b.status==='Pending' && (Number(b.due)||0)>0; });
+  var html = '<div class="stats-row">'
+    + '<div class="stat-card"><div class="stat-val">₹'+totRev.toLocaleString()+'</div><div class="stat-label">Total Revenue</div></div>'
+    + '<div class="stat-card"><div class="stat-val">₹'+totColl.toLocaleString()+'</div><div class="stat-label">✅ Collected</div></div>'
+    + '<div class="stat-card"><div class="stat-val orange">₹'+totDue.toLocaleString()+'</div><div class="stat-label">⏳ Due</div></div>'
+    + '<div class="stat-card"><div class="stat-val blue">'+pending.length+'</div><div class="stat-label">Pending Bookings</div></div>'
+    + '</div><div class="section-title">Due Payments</div>';
+  if (!pending.length) html += '<div class="card" style="text-align:center;padding:20px;color:#9E9E9E">All payments cleared 🎉</div>';
+  else pending.forEach(function(b){
+    html += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      + '<div><div style="font-weight:700">' + b.customer + '</div>'
+      + '<div style="font-size:12px;color:#9E9E9E">' + b.date + ' · ' + b.sport + '</div>'
+      + '<div style="font-size:12px;color:#9E9E9E">📞 ' + (b.phone||'') + '</div></div>'
+      + '<div style="text-align:right"><div style="font-size:18px;font-weight:800;color:var(--orange)">₹' + Number(b.due).toLocaleString() + '</div><div style="font-size:11px;color:#9E9E9E">Due</div></div></div>'
+      + '<button data-id="' + b.id + '" onclick="markPaid(this)" style="width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">✅ Mark as Fully Paid</button></div>';
+  });
+  document.getElementById('paymentsContent').innerHTML = html;
+}
+async function markPaid(btn) {
+  var id = btn.getAttribute('data-id');
+  var b  = bookings.find(function(x){ return x.id===id; });
+  if (!b || !confirm('Mark '+b.customer+' as fully paid?')) return;
+  var r = await apiPost({ action:'editBooking', id:b.id, sport:b.sport, date:b.date, start:cleanTime(b.start), end:cleanTime(b.end), customer:b.customer, phone:b.phone, total:b.total, advance:b.total, status:'Paid' });
+  if (r.success) { showToast('✅ Marked as Paid!'); await reload(); }
+  else showToast('❌ Error: '+(r.error||''));
+}
 
-function showToast(msg) {
-  var t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3000);
+// ═══════════════════════════════════════
+//  PLAYERS
+// ═══════════════════════════════════════
+function renderPlayers() {
+  if (!players.length) { document.getElementById('playersList').innerHTML='<div class="empty-state"><div class="ei">👥</div><p>No players yet — tap + to add</p></div>'; return; }
+  document.getElementById('playersList').innerHTML = players.map(function(p){
+    return '<div class="player-card">'
+      + '<div class="player-top"><div class="player-avatar">' + (p.name||'?').charAt(0).toUpperCase() + '</div>'
+      + '<div><div class="player-name">' + p.name + '</div>'
+      + '<div class="player-phone">📞 ' + (p.phone||'') + '</div>'
+      + '<span class="player-sport">' + (p.sport||'') + '</span>'
+      + '<span style="font-size:11px;color:#9E9E9E;margin-left:6px">' + (p.type||'') + '</span></div></div>'
+      + '<div class="player-actions" data-admin>'
+      + '<button class="p-edit-btn" data-id="' + p.id + '" onclick="editPlayer(this)">✏️ Edit</button>'
+      + '<button class="p-del-btn"  data-id="' + p.id + '" onclick="delPlayer(this)">🗑️ Delete</button>'
+      + '</div></div>';
+  }).join('');
+}
+function openPlayerModal() {
+  document.getElementById('plEditId').value = '';
+  document.getElementById('plModalTitle').textContent = 'Add New Player';
+  document.getElementById('plSubmitBtn').textContent  = '✅ Save Player';
+  document.getElementById('plName').value  = '';
+  document.getElementById('plPhone').value = '';
+  document.getElementById('plSport').value = 'Cricket';
+  document.getElementById('plType').value  = 'Walk-in';
+  document.getElementById('playerModal').classList.add('open');
+}
+function editPlayer(btn) {
+  if (currentRole!=='admin') { showToast('❌ Only Admin can edit players'); return; }
+  var id = btn.getAttribute('data-id');
+  var p  = players.find(function(x){ return x.id===id; });
+  if (!p) return;
+  document.getElementById('plEditId').value = p.id;
+  document.getElementById('plModalTitle').textContent = 'Edit Player';
+  document.getElementById('plSubmitBtn').textContent  = '✅ Update Player';
+  document.getElementById('plName').value  = p.name;
+  document.getElementById('plPhone').value = p.phone;
+  document.getElementById('plSport').value = p.sport;
+  document.getElementById('plType').value  = p.type;
+  document.getElementById('playerModal').classList.add('open');
+}
+async function submitPlayer() {
+  var editId = document.getElementById('plEditId').value;
+  var name   = document.getElementById('plName').value.trim();
+  var phone  = document.getElementById('plPhone').value.trim();
+  var sport  = document.getElementById('plSport').value;
+  var type   = document.getElementById('plType').value;
+  if (!name||!phone) { showToast('❌ Name and phone required!'); return; }
+  var r = await apiPost({ action: editId?'editPlayer':'addPlayer', id:editId, name, phone, sport, type });
+  if (r.success) { showToast(editId?'✅ Player updated!':'✅ Player added!'); closeModal('playerModal'); await reload(); }
+  else showToast('❌ '+(r.error||'Error'));
+}
+async function delPlayer(btn) {
+  if (currentRole!=='admin') { showToast('❌ Only Admin can delete players'); return; }
+  var id = btn.getAttribute('data-id');
+  var p  = players.find(function(x){ return x.id===id; });
+  if (!p || !confirm('Delete player '+p.name+'?')) return;
+  var r = await apiGet('deletePlayer', {id:id});
+  if (r.success) { showToast('🗑️ Player deleted!'); await reload(); }
+  else showToast('❌ '+(r.error||'Error'));
+}
+function updatePlayerDropdowns() {
+  ['bkCustomer','mpPlayer'].forEach(function(selId) {
+    var sel = document.getElementById(selId);
+    if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">-- Select Player --</option>';
+    players.forEach(function(p) {
+      var opt = document.createElement('option');
+      opt.value = p.name;
+      opt.setAttribute('data-phone', p.phone);
+      opt.textContent = p.name + (p.phone?' ('+p.phone+')':'');
+      sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+  });
+}
+function onMpPlayerChange() {
+  var sel = document.getElementById('mpPlayer');
+  var opt = sel.options[sel.selectedIndex];
+  if (opt) { var ph = opt.getAttribute('data-phone'); if(ph) document.getElementById('mpPhone').value = ph; }
+}
+
+// ═══════════════════════════════════════
+//  COMMUNITY LEDGER
+// ═══════════════════════════════════════
+function renderCommunity() {
+  if (!matches.length) {
+    document.getElementById('communityContent').innerHTML = '<div class="empty-state"><div class="ei">⚽</div><p>No matches yet<br/>Tap + to create one</p></div>';
+    return;
+  }
+  var totDue  = 0, totColl = 0;
+  matches.forEach(function(m){ (m.players||[]).forEach(function(p){ totDue+=(Number(p.due)||0); totColl+=(Number(p.advance)||0); }); });
+  var html = '<div class="comm-stats">'
+    + '<div class="comm-stat"><div class="cs-val">' + matches.length + '</div><div class="cs-lbl">Matches</div></div>'
+    + '<div class="comm-stat"><div class="cs-val" style="color:var(--green)">₹' + totColl.toLocaleString() + '</div><div class="cs-lbl">Collected</div></div>'
+    + '<div class="comm-stat"><div class="cs-val" style="color:var(--orange)">₹' + totDue.toLocaleString() + '</div><div class="cs-lbl">Due</div></div>'
+    + '</div>';
+  matches.slice().sort(function(a,b){ return b.date>a.date?1:-1; }).forEach(function(m) {
+    var mpl  = m.players||[];
+    var mColl= mpl.reduce(function(s,p){ return s+(Number(p.advance)||0); }, 0);
+    var mDue = mpl.reduce(function(s,p){ return s+(Number(p.due)||0); }, 0);
+    var mTot = mColl + mDue;
+    html += '<div class="match-card">'
+      + '<div class="match-hdr"><div><h3>' + m.sport + ' — ' + m.date + '</h3>'
+      + '<p>' + (m.start?cleanTime(m.start)+' – '+cleanTime(m.end):'') + (m.notes?' • '+m.notes:'') + '</p></div>'
+      + '<span class="match-hdr-count">' + mpl.length + ' players</span></div>'
+      + '<div class="match-summary">'
+      + '<div class="match-stat"><div class="ms-val blue">₹'+mTot.toLocaleString()+'</div><div class="ms-lbl">Total</div></div>'
+      + '<div class="match-stat"><div class="ms-val">₹'+mColl.toLocaleString()+'</div><div class="ms-lbl">Collected</div></div>'
+      + '<div class="match-stat"><div class="ms-val orange">₹'+mDue.toLocaleString()+'</div><div class="ms-lbl">Due</div></div>'
+      + '</div>';
+    mpl.forEach(function(p) {
+      var due = Number(p.due)||0, adv = Number(p.advance)||0;
+      html += '<div class="pl-row">'
+        + '<div class="pl-av">' + (p.name||'?').charAt(0).toUpperCase() + '</div>'
+        + '<div style="flex:1"><div class="pl-name">' + (p.name||'') + '</div><div class="pl-phone">' + (p.phone||'') + '</div></div>'
+        + '<div style="text-align:right;margin-right:8px">'
+        + (due>0?'<div class="pl-due">₹'+due+' due</div>':'<div style="font-size:12px;color:var(--green);font-weight:700">✅ Paid</div>')
+        + '<div class="pl-paid-lbl">Adv: ₹'+adv+'</div></div>'
+        + '<div class="pl-btns">'
+        + '<button class="pl-btn pl-btn-wa"   data-mid="'+m.id+'" data-eid="'+p.entryId+'" onclick="cmWA(this)">💬</button>'
+        + (due>0?'<button class="pl-btn pl-btn-pay"  data-mid="'+m.id+'" data-eid="'+p.entryId+'" onclick="cmPay(this)">✅</button>':'')
+        + '<button class="pl-btn pl-btn-edit" data-mid="'+m.id+'" data-eid="'+p.entryId+'" onclick="cmEdit(this)">✏️</button>'
+        + '</div></div>';
+    });
+    html += '<div class="match-actions">'
+      + '<button data-mid="'+m.id+'" onclick="openMpModal(this)">+ Add Player</button>'
+      + '<button data-mid="'+m.id+'" onclick="cmRemindAll(this)">💬 Remind All</button>'
+      + '<button data-mid="'+m.id+'" onclick="cmEditMatch(this)">✏️ Edit</button>'
+      + '<button data-mid="'+m.id+'" onclick="cmDelMatch(this)" style="color:var(--red)">🗑️</button>'
+      + '</div></div>';
+  });
+  document.getElementById('communityContent').innerHTML = html;
+}
+
+// Community button handlers using data attributes (no inline quote issues)
+function cmWA(btn) {
+  var mid = btn.getAttribute('data-mid'), eid = btn.getAttribute('data-eid');
+  var m = matches.find(function(x){ return x.id===mid; });
+  var p = m && (m.players||[]).find(function(x){ return x.entryId===eid; });
+  if (!p) return;
+  var due = Number(p.due)||0;
+  var msg = '🏟️ *URBAN SPORTS ARENA*\n*Community Match — Payment Reminder*\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '👤 *Player:* ' + p.name + '\n'
+    + '⚽ *Sport:* ' + m.sport + '\n'
+    + '📅 *Date:* ' + m.date + '\n'
+    + '🕐 *Slot:* ' + cleanTime(m.start) + ' – ' + cleanTime(m.end) + '\n'
+    + '━━━━━━━━━━━━━━━━━━━━━━\n'
+    + (due>0 ? '⏳ *Amount Due: Rs.'+due+'*\n💰 Advance Paid: Rs.'+(p.advance||0) : '✅ *Fully Paid — Thank you!*')
+    + '\n━━━━━━━━━━━━━━━━━━━━━━\n'
+    + '📍 Urban Sports Arena, Jaipur\nhttps://maps.app.goo.gl/kfmFcgcrfGDj1NKr9\n\n'
+    + '_Please clear your dues at the earliest. Thank you!_';
+  sendWA(p.phone, msg);
+}
+async function cmPay(btn) {
+  var mid = btn.getAttribute('data-mid'), eid = btn.getAttribute('data-eid');
+  var m = matches.find(function(x){ return x.id===mid; });
+  var p = m && (m.players||[]).find(function(x){ return x.entryId===eid; });
+  if (!p || !confirm('Mark '+p.name+' as fully paid?')) return;
+  var r = await apiPost({ action:'addMatchPlayer', matchId:mid, entryId:eid, name:p.name, phone:p.phone, due:0, advance:(Number(p.advance)||0)+(Number(p.due)||0), status:'Paid' });
+  if (r.success) { showToast('✅ Marked as Paid!'); await reload(); }
+  else showToast('❌ '+(r.error||'Error'));
+}
+function cmEdit(btn) {
+  var mid = btn.getAttribute('data-mid'), eid = btn.getAttribute('data-eid');
+  var m = matches.find(function(x){ return x.id===mid; });
+  var p = m && (m.players||[]).find(function(x){ return x.entryId===eid; });
+  if (!p) return;
+  document.getElementById('mpMatchId').value = mid;
+  document.getElementById('mpEntryId').value = eid;
+  document.getElementById('mpModalTitle').textContent = 'Edit Player Entry';
+  document.getElementById('mpSubmitBtn').textContent  = '✅ Update';
+  updatePlayerDropdowns();
+  document.getElementById('mpPlayer').value  = p.name;
+  document.getElementById('mpPhone').value   = p.phone;
+  document.getElementById('mpDue').value     = p.due;
+  document.getElementById('mpAdvance').value = p.advance;
+  document.getElementById('mpStatus').value  = p.status;
+  document.getElementById('mpModal').classList.add('open');
+}
+function cmRemindAll(btn) {
+  var mid = btn.getAttribute('data-mid');
+  var m = matches.find(function(x){ return x.id===mid; });
+  var pending = (m&&m.players||[]).filter(function(p){ return (Number(p.due)||0)>0; });
+  if (!pending.length) { showToast('✅ All players have paid!'); return; }
+  var i = 0;
+  function next() {
+    if (i>=pending.length) { showToast('💬 Sent '+pending.length+' reminders!'); return; }
+    var fakebtn = { getAttribute: function(k){ return k==='data-mid'?mid:pending[i].entryId; } };
+    cmWA(fakebtn); i++;
+    setTimeout(next, 2500);
+  }
+  next();
+}
+function cmEditMatch(btn) {
+  var id = btn.getAttribute('data-mid');
+  var m  = matches.find(function(x){ return x.id===id; });
+  if (!m) return;
+  document.getElementById('mEditId').value = m.id;
+  document.getElementById('matchModalTitle').textContent = 'Edit Match';
+  document.getElementById('mSubmitBtn').textContent = '✅ Update Match';
+  document.getElementById('mSport').value = m.sport;
+  document.getElementById('mDate').value  = m.date;
+  document.getElementById('mStart').value = cleanTime(m.start);
+  document.getElementById('mEnd').value   = cleanTime(m.end);
+  document.getElementById('mCost').value  = m.totalCost||'';
+  document.getElementById('mNotes').value = m.notes||'';
+  document.getElementById('matchModal').classList.add('open');
+}
+async function cmDelMatch(btn) {
+  var id = btn.getAttribute('data-mid');
+  var m  = matches.find(function(x){ return x.id===id; });
+  if (!m || !confirm('Delete this match and all player entries?')) return;
+  var r = await apiGet('deleteMatch', {id:id});
+  if (r.success) { showToast('🗑️ Match deleted!'); await reload(); }
+  else showToast('❌ '+(r.error||'Error'));
+}
+function openMatchModal() {
+  document.getElementById('mEditId').value = '';
+  document.getElementById('matchModalTitle').textContent = 'New Community Match';
+  document.getElementById('mSubmitBtn').textContent = '✅ Create Match';
+  document.getElementById('mSport').value = 'Football';
+  document.getElementById('mDate').value  = today();
+  document.getElementById('mStart').value = '06:00';
+  document.getElementById('mEnd').value   = '07:00';
+  document.getElementById('mCost').value  = '';
+  document.getElementById('mNotes').value = '';
+  document.getElementById('matchModal').classList.add('open');
+}
+async function submitMatch() {
+  var editId = document.getElementById('mEditId').value;
+  var sport  = document.getElementById('mSport').value;
+  var date   = document.getElementById('mDate').value;
+  var start  = document.getElementById('mStart').value;
+  var end    = document.getElementById('mEnd').value;
+  var cost   = document.getElementById('mCost').value;
+  var notes  = document.getElementById('mNotes').value;
+  if (!sport||!date) { showToast('❌ Sport and Date required!'); return; }
+  var btn = document.getElementById('mSubmitBtn');
+  btn.textContent='⏳ Saving...'; btn.disabled=true;
+  var r = await apiPost({ action:editId?'editMatch':'addMatch', id:editId, sport, date, start, end, totalCost:cost, notes });
+  if (r.success) { showToast(editId?'✅ Match updated!':'✅ Match created!'); closeModal('matchModal'); await reload(); }
+  else showToast('❌ '+(r.error||'Error'));
+  btn.textContent = editId?'✅ Update Match':'✅ Create Match'; btn.disabled=false;
+}
+function openMpModal(btn) {
+  var mid = btn.getAttribute('data-mid');
+  document.getElementById('mpMatchId').value = mid;
+  document.getElementById('mpEntryId').value = '';
+  document.getElementById('mpModalTitle').textContent = 'Add Player to Match';
+  document.getElementById('mpSubmitBtn').textContent  = '✅ Add Player';
+  document.getElementById('mpPlayer').value  = '';
+  document.getElementById('mpPhone').value   = '';
+  document.getElementById('mpDue').value     = '';
+  document.getElementById('mpAdvance').value = '0';
+  document.getElementById('mpStatus').value  = 'Pending';
+  updatePlayerDropdowns();
+  document.getElementById('mpModal').classList.add('open');
+}
+async function submitMatchPlayer() {
+  var matchId = document.getElementById('mpMatchId').value;
+  var entryId = document.getElementById('mpEntryId').value;
+  var name    = document.getElementById('mpPlayer').value;
+  var phone   = document.getElementById('mpPhone').value;
+  var due     = Number(document.getElementById('mpDue').value)||0;
+  var advance = Number(document.getElementById('mpAdvance').value)||0;
+  var status  = document.getElementById('mpStatus').value;
+  if (!name) { showToast('❌ Select a player!'); return; }
+  var btn = document.getElementById('mpSubmitBtn');
+  btn.textContent='⏳...'; btn.disabled=true;
+  var r = await apiPost({ action:'addMatchPlayer', matchId, entryId, name, phone, due, advance, status });
+  if (r.success) { showToast(entryId?'✅ Updated!':'✅ Player added!'); closeModal('mpModal'); await reload(); }
+  else showToast('❌ '+(r.error||'Error'));
+  btn.textContent=entryId?'✅ Update':'✅ Add Player'; btn.disabled=false;
 }
 
 // Close modal on overlay click
-document.querySelectorAll(".modal-overlay").forEach(overlay => {
-  overlay.addEventListener("click", function(e) {
-    if (e.target === this) this.classList.remove("open");
-  });
+document.querySelectorAll('.modal-overlay').forEach(function(o){
+  o.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 });
 
-
-// ── INSTALL PWA ──────────────────────────────────────────────────
-var deferredPrompt = null;
-
-// Create manifest dynamically
-(function() {
-  var manifest = {
-    name: "Urban Sports Arena",
-    short_name: "Sports Arena",
-    start_url: window.location.href,
-    display: "standalone",
-    background_color: "#1B5E20",
-    theme_color: "#1B5E20",
-    icons: [{ src: "https://via.placeholder.com/192x192/1B5E20/FFFFFF?text=USA", sizes: "192x192", type: "image/png" }]
-  };
-  var blob = new Blob([JSON.stringify(manifest)], {type: "application/json"});
-  var url  = URL.createObjectURL(blob);
-  document.getElementById("manifestLink").href = url;
-})();
-
-window.addEventListener("beforeinstallprompt", function(e) {
-  e.preventDefault();
-  deferredPrompt = e;
-  if (!localStorage.getItem("installDismissed")) {
-    document.getElementById("installBanner").classList.add("show");
-  }
-});
-
-function installApp() {
-  document.getElementById("installBanner").classList.remove("show");
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(r) {
-      if (r.outcome === "accepted") showToast("✅ App installed to home screen!");
-      deferredPrompt = null;
-    });
-  } else {
-    // iOS fallback
-    showIOSInstallGuide();
-  }
-}
-
-function dismissInstall() {
-  document.getElementById("installBanner").classList.remove("show");
-  localStorage.setItem("installDismissed", "1");
-}
-
-function showIOSInstallGuide() {
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isIOS) {
-    alert("To install on iPhone:\n\n1. Tap the Share button (box with arrow) at the bottom\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap \"Add\" — done! 🎉");
-  } else {
-    alert("To install on Android:\n\n1. Tap the 3-dot menu (⋮) in Chrome\n2. Tap \"Add to Home Screen\" or \"Install App\"\n3. Tap \"Install\" — done! 🎉");
-  }
-}
-
-// Show install guide from settings
-function showInstallGuide() { showInstallModal(); }
-function installApp() { showInstallModal(); }
-function showInstallModal() { document.getElementById("installModal").classList.add("open"); }
-function dismissInstall() { document.getElementById("installBanner") && document.getElementById("installBanner").classList.remove("show"); }
-
-// ── WHATSAPP CONFIRMATION ─────────────────────────────────────────
-// Converts ANY time format into clean "HH:MM" that <input type="time"> accepts
-function cleanTime(val) {
-  if (!val) return "";
-  var s = val.toString().trim();
-
-  // Case 1: ISO string e.g. "1899-12-30T15:38:50.000Z"
-  if (s.indexOf("T") !== -1) {
-    var timePart = s.split("T")[1];          // "15:38:50.000Z"
-    var parts = timePart.split(":");
-    var h = parseInt(parts[0]);
-    var m = parseInt(parts[1]);
-    return (h < 10 ? "0"+h : ""+h) + ":" + (m < 10 ? "0"+m : ""+m);
-  }
-
-  // Case 2: "HH:MM:SS" or "HH:MM:SS.mmm" e.g. "18:30:00"
-  if (s.indexOf(":") !== -1) {
-    var pts = s.split(":");
-    var h2  = parseInt(pts[0]);
-    var m2  = parseInt(pts[1]);
-    if (!isNaN(h2) && !isNaN(m2)) {
-      return (h2 < 10 ? "0"+h2 : ""+h2) + ":" + (m2 < 10 ? "0"+m2 : ""+m2);
-    }
-  }
-
-  // Case 3: Decimal fraction e.g. 0.875 = 21:00
-  var num = parseFloat(s);
-  if (!isNaN(num) && num >= 0 && num < 1) {
-    var totalMins = Math.round(num * 1440);
-    var h3 = Math.floor(totalMins / 60) % 24;
-    var m3 = totalMins % 60;
-    return (h3 < 10 ? "0"+h3 : ""+h3) + ":" + (m3 < 10 ? "0"+m3 : ""+m3);
-  }
-
-  return "";
-}
-
-// Keep formatTime as alias for WhatsApp usage
-function formatTime(val) { return cleanTime(val); }
-
-function sendWhatsApp(id) {
-  var b = bookings.find(function(x){ return x.id === id; });
-  if (!b) return;
-
-  var due      = Number(b.due) || 0;
-  var advance  = Number(b.advance) || 0;
-  var total    = Number(b.total) || 0;
-  var startFmt = formatTime(b.start);
-  var endFmt   = formatTime(b.end);
-
-  var paymentLine = due > 0
-    ? "💰 Advance Paid: Rs." + advance + "\n⏳ Due Amount: Rs." + due
-    : "✅ Full Payment: Rs." + total + " (Paid)";
-
-  var message =
-    "🏟️ *URBAN SPORTS ARENA*\n" +
-    "*Booking Confirmation*\n" +
-    "━━━━━━━━━━━━━━━━━━━━━━\n" +
-    "👤 *Name:* " + b.customer + "\n" +
-    "🏏 *Sport:* " + b.sport + "\n" +
-    "📅 *Date:* " + b.date + (b.day ? " (" + b.day + ")" : "") + "\n" +
-    "🕐 *Slot:* " + startFmt + " – " + endFmt + "\n" +
-    "━━━━━━━━━━━━━━━━━━━━━━\n" +
-    paymentLine + "\n" +
-    "━━━━━━━━━━━━━━━━━━━━━━\n" +
-    "📍 *Location:*\n" +
-    "https://maps.app.goo.gl/kfmFcgcrfGDj1NKr9\n\n" +
-    "Please arrive 5 minutes early.\n" +
-    "See you on the field! ⚽🏏\n\n" +
-    "_Urban Sports Arena, Jaipur_";
-
-  var phone = (b.phone || "").toString().replace(/[^0-9]/g, "");
-  if (phone.length === 10) phone = "91" + phone;
-
-  var encoded = encodeURIComponent(message);
-
-  if (phone.length >= 12) {
-    // Deep link — opens WhatsApp OR WhatsApp Business directly
-    window.location.href = "whatsapp://send?phone=" + phone + "&text=" + encoded;
-    // Web fallback after 1.5s
-    setTimeout(function() {
-      window.open("https://api.whatsapp.com/send?phone=" + phone + "&text=" + encoded, "_blank");
-    }, 1500);
-  } else {
-    // No phone number — let user pick contact
-    window.location.href = "whatsapp://send?text=" + encoded;
-    setTimeout(function() {
-      window.open("https://api.whatsapp.com/send?text=" + encoded, "_blank");
-    }, 1500);
-  }
-}
-
-// ── CUSTOMER DROPDOWN ─────────────────────────────────────────────
-function updateCustomerDropdown() {
-  var sel = document.getElementById("fCustomer");
-  if (!sel) return;
-  var current = sel.value;
-  sel.innerHTML = '<option value="">-- Select Player --</option>';
-  players.forEach(function(p) {
-    var opt = document.createElement("option");
-    opt.value = p.name;
-    opt.setAttribute("data-phone", p.phone);
-    opt.textContent = p.name + " (" + p.phone + ")";
-    sel.appendChild(opt);
-  });
-  if (current) sel.value = current;
-}
-
-function onCustomerSelect() {
-  var sel = document.getElementById("fCustomer");
-  var opt = sel.options[sel.selectedIndex];
-  if (opt) {
-    var phone = opt.getAttribute("data-phone");
-    if (phone) document.getElementById("fPhone").value = phone;
-  }
-}
-
-function openQuickAddPlayer() {
-  // Save booking modal state, open player modal on top
-  document.getElementById("playerModalTitle").textContent = "Add New Player";
-  document.getElementById("pEditId").value = "";
-  document.getElementById("pName").value = "";
-  document.getElementById("pPhone").value = "";
-  document.getElementById("pSport").value = "Cricket";
-  document.getElementById("pType").value = "Walk-in";
-  document.getElementById("playerSubmitBtn").textContent = "✅ Save Player";
-  document.getElementById("playerModal").classList.add("open");
-}
-
-// ── MARK AS PAID ──────────────────────────────────────────────────
-async function markAsPaid(id) {
-  if (currentRole !== "admin") { showToast("❌ Only Admin can mark payments as complete"); return; }
-  var b = bookings.find(x => x.id === id);
-  if (!b) return;
-  if (!confirm("Mark " + b.customer + "'s booking as fully paid?")) return;
-  try {
-    var data = {
-      action: "editBooking",
-      id: b.id, sport: b.sport, date: b.date,
-      start: cleanTime(b.start), end: cleanTime(b.end),
-      customer: b.customer, phone: b.phone,
-      total: b.total, advance: b.total,
-      status: "Paid"
-    };
-    var r = await apiPost(data);
-    if (r.success) {
-      showToast("✅ Payment marked as complete!");
-      await loadBookings();
-      renderDashboard(); renderBookings(); renderPayments();
-    }
-  } catch(e) { showToast("❌ Could not update — try again"); }
-}
-
-// ── EDIT PLAYER ───────────────────────────────────────────────────
-function openEditPlayerModal(id) {
-  if (currentRole !== "admin") { showToast("❌ Only Admin can edit players"); return; }
-  var p = players.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById("playerModalTitle").textContent = "Edit Player";
-  document.getElementById("pEditId").value  = p.id;
-  document.getElementById("pName").value    = p.name;
-  document.getElementById("pPhone").value   = p.phone;
-  document.getElementById("pSport").value   = p.sport;
-  document.getElementById("pType").value    = p.type;
-  document.getElementById("playerSubmitBtn").textContent = "✅ Update Player";
-  document.getElementById("playerModal").classList.add("open");
-}
-
-async function deletePlayer(id) {
-  if (currentRole !== "admin") { showToast("❌ Only Admin can delete players"); return; }
-  var p = players.find(x => x.id === id);
-  if (!p) return;
-  if (!confirm("Delete player " + p.name + "?")) return;
-  try {
-    var r = await apiGet("deletePlayer", { id });
-    if (r.success) {
-      showToast("🗑️ Player deleted!");
-      await loadPlayers();
-      renderPlayers();
-      updateCustomerDropdown();
-    } else {
-      showToast("❌ Could not delete");
-    }
-  } catch(e) { showToast("❌ Error deleting player"); }
-}
-
-
-// ════════════════════════════════════════════════════════════════
-//  COMMUNITY LEDGER
-// ════════════════════════════════════════════════════════════════
-var matches = [];   // [{id, sport, date, start, end, totalCost, notes, players:[{...}]}]
-
-// ── LOAD ──────────────────────────────────────────────────────────
-async function loadMatches() {
-  try {
-    var r = await apiGet("getMatches");
-    if (r.success) matches = r.data;
-  } catch(e) { showToast("❌ Could not load community matches"); }
-}
-
-// ── RENDER ────────────────────────────────────────────────────────
-function renderCommunity() {
-  if (!matches.length) {
-    document.getElementById("communityContent").innerHTML =
-      '<div class="empty-state"><div class="icon">⚽</div><p>No community matches yet<br/>Tap + to create one</p></div>';
-    return;
-  }
-
-  // Summary stats
-  var totalMatches = matches.length;
-  var totalDue     = 0;
-  var totalColl    = 0;
-  matches.forEach(function(m) {
-    (m.players||[]).forEach(function(p) {
-      totalDue  += Number(p.due)     || 0;
-      totalColl += Number(p.advance) || 0;
-    });
-  });
-
-  var html = '<div class="community-stats">'
-    + '<div class="community-stat"><div class="community-stat-val blue">' + totalMatches + '</div><div class="community-stat-label">Matches</div></div>'
-    + '<div class="community-stat"><div class="community-stat-val">₹' + totalColl.toLocaleString() + '</div><div class="community-stat-label">Collected</div></div>'
-    + '<div class="community-stat"><div class="community-stat-val due" style="color:var(--orange)">₹' + totalDue.toLocaleString() + '</div><div class="community-stat-label">Due</div></div>'
-    + '</div>';
-
-  // Sort matches newest first
-  var sorted = matches.slice().sort(function(a,b){ return b.date > a.date ? 1 : -1; });
-
-  sorted.forEach(function(m) {
-    var mPlayers  = m.players || [];
-    var mTotal    = mPlayers.reduce(function(s,p){ return s + (Number(p.due)||0) + (Number(p.advance)||0); }, 0);
-    var mColl     = mPlayers.reduce(function(s,p){ return s + (Number(p.advance)||0); }, 0);
-    var mDue      = mPlayers.reduce(function(s,p){ return s + (Number(p.due)||0); }, 0);
-    var pendCount = mPlayers.filter(function(p){ return p.status !== "Paid" && (Number(p.due)||0) > 0; }).length;
-
-    html += '<div class="match-card">'
-      + '<div class="match-header">'
-      +   '<div class="match-header-left">'
-      +     '<h3>' + (m.sport||'') + ' — ' + (m.date||'') + '</h3>'
-      +     '<p>' + (m.start ? cleanTime(m.start)+' – '+cleanTime(m.end) : '') + (m.notes ? '  •  '+m.notes : '') + '</p>'
-      +   '</div>'
-      +   '<span style="background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;">' + mPlayers.length + ' players</span>'
-      + '</div>'
-
-      // Summary row
-      + '<div class="match-summary">'
-      +   '<div class="match-stat"><div class="match-stat-val blue">₹' + mTotal.toLocaleString() + '</div><div class="match-stat-label">Total</div></div>'
-      +   '<div class="match-stat"><div class="match-stat-val">₹'  + mColl.toLocaleString()  + '</div><div class="match-stat-label">Collected</div></div>'
-      +   '<div class="match-stat"><div class="match-stat-val due">₹' + mDue.toLocaleString()  + '</div><div class="match-stat-label">Due</div></div>'
-      + '</div>';
-
-    // Player rows
-    mPlayers.forEach(function(p) {
-      var due = Number(p.due) || 0;
-      var adv = Number(p.advance) || 0;
-      html += '<div class="player-ledger-row">'
-        + '<div class="player-ledger-avatar">' + (p.name||'?').charAt(0).toUpperCase() + '</div>'
-        + '<div style="flex:1;">'
-        +   '<div class="player-ledger-name">' + (p.name||'') + '</div>'
-        +   '<div class="player-ledger-phone">' + (p.phone||'') + '</div>'
-        + '</div>'
-        + '<div class="player-ledger-amounts">'
-        +   (due > 0
-              ? '<div class="player-ledger-due">₹' + due + ' due</div>'
-              : '<div style="font-size:12px;color:var(--green);font-weight:700;">✅ Paid</div>')
-        +   '<div class="player-ledger-paid">Advance: ₹' + adv + '</div>'
-        + '</div>'
-        + '<div class="player-ledger-actions">'
-        +   '<button class="ledger-btn ledger-btn-wa" data-mid="' + m.id + '" data-eid="' + p.entryId + '" onclick="communityWA(this)">💬</button>'
-        +   (due > 0 ? '<button class="ledger-btn ledger-btn-pay" data-mid="' + m.id + '" data-eid="' + p.entryId + '" onclick="communityPay(this)">✅</button>' : '')
-        +   '<button class="ledger-btn ledger-btn-edit" data-mid="' + m.id + '" data-eid="' + p.entryId + '" onclick="communityEdit(this)">✏️</button>'
-        + '</div>';
-    });
-
-    // Match actions
-    var matchActHtml = '<div class="match-actions">';
-    matchActHtml += '<button onclick="openAddMatchPlayerModal(this)" data-mid="' + m.id + '">+ Add Player</button>';
-    matchActHtml += '<button onclick="sendAllRemindersBtn(this)" data-mid="' + m.id + '">&#128172; Remind All</button>';
-    matchActHtml += '<button onclick="openEditMatchModal(this)" data-mid="' + m.id + '">&#9999; Edit</button>';
-    matchActHtml += '<button onclick="deleteMatchBtn(this)" data-mid="' + m.id + '" style="color:var(--red);">&#128465;</button>';
-    matchActHtml += '</div></div>';
-    html += matchActHtml;
-  });
-
-  document.getElementById("communityContent").innerHTML = html;
-}
-
-// ── ADD MATCH ─────────────────────────────────────────────────
-function openAddMatchModal() {
-  document.getElementById("mEditId").value = "";
-  document.getElementById("matchModalTitle").textContent = "New Community Match";
-  document.getElementById("matchSubmitBtn").textContent = "✅ Create Match";
-  document.getElementById("mSport").value = "Football";
-  document.getElementById("mDate").value  = new Date().toISOString().split("T")[0];
-  document.getElementById("mStart").value = "06:00";
-  document.getElementById("mEnd").value   = "07:00";
-  document.getElementById("mTotalCost").value = "";
-  document.getElementById("mNotes").value = "";
-  document.getElementById("matchModal").classList.add("open");
-}
-
-async function submitMatch() {
-  var editId    = document.getElementById("mEditId").value;
-  var sport     = document.getElementById("mSport").value;
-  var date      = document.getElementById("mDate").value;
-  var start     = document.getElementById("mStart").value;
-  var end       = document.getElementById("mEnd").value;
-  var totalCost = document.getElementById("mTotalCost").value;
-  var notes     = document.getElementById("mNotes").value;
-  if (!sport || !date) { showToast("❌ Sport and Date are required!"); return; }
-  var btn = document.getElementById("matchSubmitBtn");
-  btn.textContent = "⏳ Saving..."; btn.disabled = true;
-  try {
-    var payload = { action: editId ? "editMatch" : "addMatch", id: editId, sport, date, start, end, totalCost, notes };
-    var r = await apiPost(payload);
-    if (r.success) {
-      showToast(editId ? "✅ Match updated!" : "✅ Match created!");
-      closeModal("matchModal");
-      await loadMatches();
-      renderCommunity();
-    } else { showToast("❌ " + (r.error||"Error")); }
-  } catch(e) { showToast("❌ Network error"); }
-  btn.textContent = editId ? "✅ Update Match" : "✅ Create Match";
-  btn.disabled = false;
-}
-
-async function deleteMatch(id) {
-  if (!confirm("Delete this match and all player entries?")) return;
-  try {
-    var r = await apiGet("deleteMatch", { id });
-    if (r.success) {
-      showToast("🗑️ Match deleted!");
-      await loadMatches(); renderCommunity();
-    }
-  } catch(e) { showToast("❌ Could not delete"); }
-}
-
-// ── ADD/EDIT PLAYER TO MATCH ──────────────────────────────────────
-function openAddMatchPlayerModal(matchId) {
-  document.getElementById("mpMatchId").value = matchId;
-  document.getElementById("mpEntryId").value = "";
-  document.getElementById("mpModalTitle").textContent = "Add Player to Match";
-  document.getElementById("mpSubmitBtn").textContent  = "✅ Add Player";
-  document.getElementById("mpPlayer").value   = "";
-  document.getElementById("mpPhone").value    = "";
-  document.getElementById("mpDue").value      = "";
-  document.getElementById("mpAdvance").value  = "0";
-  document.getElementById("mpStatus").value   = "Pending";
-  updateMpPlayerDropdown();
-  document.getElementById("matchPlayerModal").classList.add("open");
-}
-
-function openEditMatchPlayer(matchId, entryId) {
-  var m = matches.find(function(x){ return x.id === matchId; });
-  if (!m) return;
-  var p = (m.players||[]).find(function(x){ return x.entryId === entryId; });
-  if (!p) return;
-  document.getElementById("mpMatchId").value  = matchId;
-  document.getElementById("mpEntryId").value  = entryId;
-  document.getElementById("mpModalTitle").textContent = "Edit Player Entry";
-  document.getElementById("mpSubmitBtn").textContent  = "✅ Update";
-  updateMpPlayerDropdown();
-  document.getElementById("mpPlayer").value   = p.name;
-  document.getElementById("mpPhone").value    = p.phone;
-  document.getElementById("mpDue").value      = p.due;
-  document.getElementById("mpAdvance").value  = p.advance;
-  document.getElementById("mpStatus").value   = p.status;
-  document.getElementById("matchPlayerModal").classList.add("open");
-}
-
-function updateMpPlayerDropdown() {
-  var sel = document.getElementById("mpPlayer");
-  sel.innerHTML = '<option value="">-- Select Player --</option>';
-  players.forEach(function(p) {
-    var opt = document.createElement("option");
-    opt.value = p.name;
-    opt.setAttribute("data-phone", p.phone);
-    opt.textContent = p.name + (p.phone ? " ("+p.phone+")" : "");
-    sel.appendChild(opt);
-  });
-}
-
-function onMpPlayerSelect() {
-  var sel = document.getElementById("mpPlayer");
-  var opt = sel.options[sel.selectedIndex];
-  if (opt) {
-    var phone = opt.getAttribute("data-phone");
-    if (phone) document.getElementById("mpPhone").value = phone;
-  }
-}
-
-async function submitMatchPlayer() {
-  var matchId = document.getElementById("mpMatchId").value;
-  var entryId = document.getElementById("mpEntryId").value;
-  var name    = document.getElementById("mpPlayer").value;
-  var phone   = document.getElementById("mpPhone").value;
-  var due     = Number(document.getElementById("mpDue").value) || 0;
-  var advance = Number(document.getElementById("mpAdvance").value) || 0;
-  var status  = document.getElementById("mpStatus").value;
-  if (!name || !matchId) { showToast("❌ Please select a player!"); return; }
-  var btn = document.getElementById("mpSubmitBtn");
-  btn.textContent = "⏳ Saving..."; btn.disabled = true;
-  try {
-    var payload = { action: "addMatchPlayer", matchId, entryId, name, phone, due, advance, status };
-    var r = await apiPost(payload);
-    if (r.success) {
-      showToast(entryId ? "✅ Player updated!" : "✅ Player added to match!");
-      closeModal("matchPlayerModal");
-      await loadMatches(); renderCommunity();
-    } else { showToast("❌ " + (r.error||"Error")); }
-  } catch(e) { showToast("❌ Network error"); }
-  btn.textContent = entryId ? "✅ Update" : "✅ Add Player";
-  btn.disabled = false;
-}
-
-// ── MARK PLAYER PAID ──────────────────────────────────────────────
-async function markPlayerPaid(matchId, entryId) {
-  var m = matches.find(function(x){ return x.id === matchId; });
-  if (!m) return;
-  var p = (m.players||[]).find(function(x){ return x.entryId === entryId; });
-  if (!p) return;
-  if (!confirm("Mark " + p.name + " as fully paid?")) return;
-  // Staff allowed for community payments
-  try {
-    var payload = { action: "addMatchPlayer", matchId, entryId,
-      name: p.name, phone: p.phone,
-      due: 0, advance: (Number(p.advance)||0) + (Number(p.due)||0),
-      status: "Paid" };
-    var r = await apiPost(payload);
-    if (r.success) {
-      showToast("✅ " + p.name + " marked as Paid!");
-      await loadMatches(); renderCommunity();
-    }
-  } catch(e) { showToast("❌ Could not update"); }
-}
-
-// ── WHATSAPP REMINDER ──────────────────────────────────────────────
-function sendCommunityWhatsApp(matchId, entryId) {
-  var m = matches.find(function(x){ return x.id === matchId; });
-  if (!m) return;
-  var p = (m.players||[]).find(function(x){ return x.entryId === entryId; });
-  if (!p) return;
-  var due = Number(p.due) || 0;
-  var msg = "🏟️ *URBAN SPORTS ARENA*\n"
-    + "*Community Match — Payment Reminder*\n"
-    + "━━━━━━━━━━━━━━━━━━━━━━\n"
-    + "👤 *Player:* " + p.name + "\n"
-    + "⚽ *Sport:* " + m.sport + "\n"
-    + "📅 *Date:* " + m.date + "\n"
-    + "🕐 *Slot:* " + cleanTime(m.start) + " – " + cleanTime(m.end) + "\n"
-    + "━━━━━━━━━━━━━━━━━━━━━━\n"
-    + (due > 0
-        ? "⏳ *Amount Due: Rs." + due + "*\n💰 Advance Paid: Rs." + (p.advance||0)
-        : "✅ *Fully Paid — Thank you!*")
-    + "\n━━━━━━━━━━━━━━━━━━━━━━\n"
-    + "📍 Urban Sports Arena, Jaipur\n"
-    + "https://maps.app.goo.gl/kfmFcgcrfGDj1NKr9\n\n"
-    + "_Please clear your dues at the earliest. Thank you!_";
-  var phone = (p.phone||"").toString().replace(/[^0-9]/g,"");
-  if (phone.length === 10) phone = "91" + phone;
-  var encoded = encodeURIComponent(msg);
-  if (phone.length >= 12) {
-    window.location.href = "whatsapp://send?phone=" + phone + "&text=" + encoded;
-    setTimeout(function(){ window.open("https://api.whatsapp.com/send?phone="+phone+"&text="+encoded,"_blank"); }, 1500);
-  } else {
-    window.location.href = "whatsapp://send?text=" + encoded;
-    setTimeout(function(){ window.open("https://api.whatsapp.com/send?text="+encoded,"_blank"); }, 1500);
-  }
-}
-
-function sendAllReminders(matchId) {
-  var m = matches.find(function(x){ return x.id === matchId; });
-  if (!m) return;
-  var pending = (m.players||[]).filter(function(p){ return (Number(p.due)||0) > 0; });
-  if (!pending.length) { showToast("✅ All players have paid!"); return; }
-  var i = 0;
-  function sendNext() {
-    if (i >= pending.length) { showToast("💬 Sent " + pending.length + " reminders!"); return; }
-    sendCommunityWhatsApp(matchId, pending[i].entryId);
-    i++;
-    setTimeout(sendNext, 2500);
-  }
-  sendNext();
-}
-
-
-// ── COMMUNITY BUTTON HELPERS (use data attributes to avoid quote issues) ────
-function communityWA(btn) {
-  sendCommunityWhatsApp(btn.getAttribute("data-mid"), btn.getAttribute("data-eid"));
-}
-function communityPay(btn) {
-  markPlayerPaid(btn.getAttribute("data-mid"), btn.getAttribute("data-eid"));
-}
-function communityEdit(btn) {
-  openEditMatchPlayer(btn.getAttribute("data-mid"), btn.getAttribute("data-eid"));
-}
-function openAddMatchPlayerModal(btn) {
-  var matchId = typeof btn === "string" ? btn : btn.getAttribute("data-mid");
-  document.getElementById("mpMatchId").value = matchId;
-  document.getElementById("mpEntryId").value = "";
-  document.getElementById("mpModalTitle").textContent = "Add Player to Match";
-  document.getElementById("mpSubmitBtn").textContent  = "✅ Add Player";
-  document.getElementById("mpPlayer").value   = "";
-  document.getElementById("mpPhone").value    = "";
-  document.getElementById("mpDue").value      = "";
-  document.getElementById("mpAdvance").value  = "0";
-  document.getElementById("mpStatus").value   = "Pending";
-  updateMpPlayerDropdown();
-  document.getElementById("matchPlayerModal").classList.add("open");
-}
-function sendAllRemindersBtn(btn) { sendAllReminders(btn.getAttribute("data-mid")); }
-function openEditMatchModal(btn) {
-  var id = typeof btn === "string" ? btn : btn.getAttribute("data-mid");
-  var m = matches.find(function(x){ return x.id === id; });
-  if (!m) return;
-  document.getElementById("mEditId").value = m.id;
-  document.getElementById("matchModalTitle").textContent = "Edit Match";
-  document.getElementById("matchSubmitBtn").textContent = "✅ Update Match";
-  document.getElementById("mSport").value  = m.sport;
-  document.getElementById("mDate").value   = m.date;
-  document.getElementById("mStart").value  = cleanTime(m.start);
-  document.getElementById("mEnd").value    = cleanTime(m.end);
-  document.getElementById("mTotalCost").value = m.totalCost || "";
-  document.getElementById("mNotes").value  = m.notes || "";
-  document.getElementById("matchModal").classList.add("open");
-}
-function deleteMatchBtn(btn) { deleteMatch(btn.getAttribute("data-mid")); }
-
-// ── START ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════
+//  START
+// ═══════════════════════════════════════
 if (currentRole && currentPin) {
-  document.getElementById("loginScreen").classList.remove("open");
-  applyRoleUI();
-  if (API_URL) {
-    document.getElementById("setupScreen").classList.remove("open");
-    init();
-  } else {
-    document.getElementById("setupScreen").classList.add("open");
-  }
-} else {
-  document.getElementById("loginScreen").classList.add("open");
-  document.getElementById("setupScreen").classList.remove("open");
+  document.getElementById('loginScreen').classList.remove('open');
+  applyRole();
+  if (API_URL) init(); else showSetup();
 }
 </script>
 </body>

@@ -320,9 +320,24 @@ body.role-staff [data-admin]{ display:none !important }
     <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="bkPhone" placeholder="Mobile number"/></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Total ₹ *</label><input class="form-input" type="number" id="bkTotal" oninput="calcDue()"/></div>
-      <div class="form-group"><label class="form-label">Advance ₹</label><input class="form-input" type="number" id="bkAdvance" value="0" oninput="calcDue()"/></div>
+        <div class="form-group"><label class="form-label">Advance ₹</label><input class="form-input" type="number" id="bkAdvance" value="0" oninput="calcDue()"/></div>
     </div>
     <div class="form-group"><label class="form-label">Due ₹</label><input class="form-input" type="number" id="bkDue" readonly style="background:#F5F5F5"/></div>
+    <div class="form-group">
+      <label class="form-label">Advance Payment Mode</label>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="bkModeOnline" onclick="setPayMode('bk','Online')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">📱 Online</button>
+        <button type="button" id="bkModeCash" onclick="setPayMode('bk','Cash')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">💵 Cash</button>
+        <button type="button" id="bkModeBoth" onclick="setPayMode('bk','Both')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">🔀 Both</button>
+      </div>
+      <input type="hidden" id="bkPayMode" value=""/>
+    </div>
+    <div id="bkBothFields" style="display:none">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Online ₹</label><input class="form-input" type="number" id="bkOnlineAmt" value="0" placeholder="0"/></div>
+        <div class="form-group"><label class="form-label">Cash ₹</label><input class="form-input" type="number" id="bkCashAmt" value="0" placeholder="0"/></div>
+      </div>
+    </div>
     <div class="form-group">
       <label class="form-label">Status *</label>
       <select class="form-select" id="bkStatus"><option value="Pending">⏳ Pending</option><option value="Paid">✅ Paid</option></select>
@@ -397,6 +412,62 @@ body.role-staff [data-admin]{ display:none !important }
       <select class="form-select" id="mpStatus"><option value="Pending">⏳ Pending</option><option value="Paid">✅ Paid</option></select>
     </div>
     <button class="btn btn-primary" id="mpSubmitBtn" onclick="submitMatchPlayer()">✅ Add Player</button>
+  </div>
+</div>
+
+<!-- PAY MODE MODAL -->
+<div class="modal-overlay" id="payModeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✅ Mark as Fully Paid</div>
+      <button class="modal-close" onclick="closeModal('payModeModal')">✕</button>
+    </div>
+    <input type="hidden" id="pmBookingId"/>
+    <p style="font-size:13px;color:#616161;margin-bottom:16px">Select how the remaining due amount was received:</p>
+    <div class="form-group">
+      <label class="form-label">Payment Mode *</label>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button type="button" id="pmModeOnline" onclick="setPmMode('Online')" style="flex:1;padding:12px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">📱 Online</button>
+        <button type="button" id="pmModeCash"   onclick="setPmMode('Cash')"   style="flex:1;padding:12px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">💵 Cash</button>
+        <button type="button" id="pmModeBoth"   onclick="setPmMode('Both')"   style="flex:1;padding:12px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">🔀 Both</button>
+      </div>
+      <input type="hidden" id="pmPayMode" value=""/>
+    </div>
+    <div id="pmBothFields" style="display:none">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Online ₹</label><input class="form-input" type="number" id="pmOnlineAmt" value="0"/></div>
+        <div class="form-group"><label class="form-label">Cash ₹</label><input class="form-input" type="number" id="pmCashAmt" value="0"/></div>
+      </div>
+    </div>
+    <div style="background:#F5F5F5;border-radius:10px;padding:12px;margin-bottom:14px">
+      <div style="font-size:12px;color:#616161">Due Amount</div>
+      <div style="font-size:20px;font-weight:800;color:var(--orange)" id="pmDueAmount">₹0</div>
+    </div>
+    <button class="btn btn-primary" onclick="confirmMarkPaid()">✅ Confirm Payment</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODE MODAL -->
+<div class="modal-overlay" id="payModeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 Record Payment</div>
+      <button class="modal-close" onclick="closeModal('payModeModal')">✕</button>
+    </div>
+    <input type="hidden" id="pmBkId"/>
+    <div style="text-align:center;padding:16px 0">
+      <div style="font-size:28px;font-weight:800;color:var(--green)" id="pmAmount"></div>
+      <div style="font-size:14px;color:var(--text-soft);margin-top:4px">Payment from <b id="pmCustomer"></b></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Payment Mode *</label>
+      <select class="form-select" id="pmMode">
+        <option value="">-- Select Mode --</option>
+        <option value="Cash">💵 Cash</option>
+        <option value="Online">📱 Online (UPI)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="pmSubmitBtn" onclick="submitMarkPaid()">✅ Confirm Payment</button>
   </div>
 </div>
 
@@ -643,7 +714,7 @@ function bkCardHtml(b) {
     + (due>0?'<div class="bk-due">Due: ₹'+due+'</div>':'')
     + '</div><div style="font-size:12px;color:#9E9E9E">' + (b.phone||'') + '</div></div>'
     + '<div class="bk-actions">'
-    + '<button class="btn-edit" data-admin onclick="editBk(this)" data-id="' + b.id + '">✏️ Edit</button>'
+    + '<button class="btn-edit" onclick="editBk(this)" data-id="' + b.id + '">✏️ Edit</button>'
     + '<button class="btn-wa" onclick="sendBkWA(this)" data-id="' + b.id + '">💬 WhatsApp</button>'
     + '<button class="btn-del" data-admin onclick="delBk(this)" data-id="' + b.id + '">🗑️ Delete</button>'
     + '</div></div>';
@@ -663,13 +734,14 @@ function openBookingModal() {
   document.getElementById('bkCustomer').value = '';
   document.getElementById('bkPhone').value    = '';
   document.getElementById('bkTotal').value    = '';
-  document.getElementById('bkAdvance').value  = '0';
-  document.getElementById('bkDue').value      = '';
-  document.getElementById('bkStatus').value   = 'Pending';
+  document.getElementById('bkAdvance').value      = '0';
+  document.getElementById('bkAdvanceMode').value  = '';
+  document.getElementById('bkDue').value          = '';
+  document.getElementById('bkStatus').value       = 'Pending';
+  setPayMode('bk', '');
   document.getElementById('bookingModal').classList.add('open');
 }
 function editBk(btn) {
-  if (currentRole !== 'admin') { showToast('❌ Only Admin can edit bookings'); return; }
   var id = btn.getAttribute('data-id');
   var b  = bookings.find(function(x){ return x.id===id; });
   if (!b) return;
@@ -681,10 +753,11 @@ function editBk(btn) {
   document.getElementById('bkStart').value    = cleanTime(b.start);
   document.getElementById('bkEnd').value      = cleanTime(b.end);
   document.getElementById('bkPhone').value    = b.phone;
-  document.getElementById('bkTotal').value    = b.total;
-  document.getElementById('bkAdvance').value  = b.advance;
-  document.getElementById('bkDue').value      = b.due;
-  document.getElementById('bkStatus').value   = b.status;
+  document.getElementById('bkTotal').value        = b.total;
+  document.getElementById('bkAdvance').value      = b.advance;
+  document.getElementById('bkAdvanceMode').value  = b.advanceMode || '';
+  document.getElementById('bkDue').value          = b.due;
+  document.getElementById('bkStatus').value       = b.status;
   updatePlayerDropdowns();
   document.getElementById('bkCustomer').value = b.customer;
   document.getElementById('bookingModal').classList.add('open');
@@ -709,12 +782,15 @@ async function submitBooking() {
   var phone  = document.getElementById('bkPhone').value;
   var total  = Number(document.getElementById('bkTotal').value)||0;
   var advance= Number(document.getElementById('bkAdvance').value)||0;
-  var status = document.getElementById('bkStatus').value;
+  var status  = document.getElementById('bkStatus').value;
+  var payMode = document.getElementById('bkPayMode').value;
+  var onlineAmt = Number(document.getElementById('bkOnlineAmt').value)||0;
+  var cashAmt   = Number(document.getElementById('bkCashAmt').value)||0;
   if (!sport||!date||!start||!end||!cust||!total) { showToast('❌ Fill all required fields!'); return; }
   var btn = document.getElementById('bkSubmitBtn');
   btn.textContent = '⏳ Saving...'; btn.disabled = true;
   try {
-    var r = await apiPost({ action: editId?'editBooking':'addBooking', id:editId, sport, date, start, end, customer:cust, phone, total, advance, status });
+    var r = await apiPost({ action: editId?'editBooking':'addBooking', id:editId, sport, date, start, end, customer:cust, phone, total, advance, advanceMode, status });
     if (r.success) { showToast(editId?'✅ Booking updated!':'✅ Booking saved + Calendar synced!'); closeModal('bookingModal'); await reload(); }
     else showToast('❌ ' + (r.error||'Error'));
   } catch(e) { showToast('❌ Network error'); }
@@ -770,16 +846,28 @@ function sendWA(phone, msg) {
 //  PAYMENTS
 // ═══════════════════════════════════════
 function renderPayments() {
-  var totRev  = bookings.reduce(function(s,b){ return s+(Number(b.total)||0); }, 0);
-  var totColl = bookings.reduce(function(s,b){ return s+(Number(b.advance)||0); }, 0);
-  var totDue  = bookings.reduce(function(s,b){ return s+(Number(b.due)||0); }, 0);
-  var pending = bookings.filter(function(b){ return b.status==='Pending' && (Number(b.due)||0)>0; });
+  var totRev   = bookings.reduce(function(s,b){ return s+(Number(b.total)||0); }, 0);
+  var totColl  = bookings.reduce(function(s,b){ return s+(Number(b.advance)||0); }, 0);
+  var totDue   = bookings.reduce(function(s,b){ return s+(Number(b.due)||0); }, 0);
+  var totCash  = bookings.reduce(function(s,b){ return b.advanceMode==='Cash'  ? s+(Number(b.advance)||0) : s; }, 0);
+  var totOnline= bookings.reduce(function(s,b){ return b.advanceMode==='Online'? s+(Number(b.advance)||0) : s; }, 0);
+  var pending  = bookings.filter(function(b){ return b.status==='Pending' && (Number(b.due)||0)>0; });
   var html = '<div class="stats-row">'
     + '<div class="stat-card"><div class="stat-val">₹'+totRev.toLocaleString()+'</div><div class="stat-label">Total Revenue</div></div>'
     + '<div class="stat-card"><div class="stat-val">₹'+totColl.toLocaleString()+'</div><div class="stat-label">✅ Collected</div></div>'
     + '<div class="stat-card"><div class="stat-val orange">₹'+totDue.toLocaleString()+'</div><div class="stat-label">⏳ Due</div></div>'
     + '<div class="stat-card"><div class="stat-val blue">'+pending.length+'</div><div class="stat-label">Pending Bookings</div></div>'
-    + '</div><div class="section-title">Due Payments</div>';
+    + '</div>'
+    + '<div class="card" style="padding:12px;margin-bottom:12px">'
+    + '<div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:10px">PAYMENT BREAKDOWN</div>'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F0F0F0">'
+    + '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💵</span><span style="font-weight:600">Cash</span></div>'
+    + '<div style="font-size:16px;font-weight:800;color:var(--green)">₹'+totCash.toLocaleString()+'</div></div>'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">'
+    + '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">📱</span><span style="font-weight:600">Online (UPI)</span></div>'
+    + '<div style="font-size:16px;font-weight:800;color:var(--blue)">₹'+totOnline.toLocaleString()+'</div></div>'
+    + '</div>'
+    + '<div class="section-title">Due Payments</div>';
   if (!pending.length) html += '<div class="card" style="text-align:center;padding:20px;color:#9E9E9E">All payments cleared 🎉</div>';
   else pending.forEach(function(b){
     html += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
@@ -787,17 +875,33 @@ function renderPayments() {
       + '<div style="font-size:12px;color:#9E9E9E">' + b.date + ' · ' + b.sport + '</div>'
       + '<div style="font-size:12px;color:#9E9E9E">📞 ' + (b.phone||'') + '</div></div>'
       + '<div style="text-align:right"><div style="font-size:18px;font-weight:800;color:var(--orange)">₹' + Number(b.due).toLocaleString() + '</div><div style="font-size:11px;color:#9E9E9E">Due</div></div></div>'
-      + '<button data-id="' + b.id + '" onclick="markPaid(this)" style="width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">✅ Mark as Fully Paid</button></div>';
+      + '<button data-id="' + b.id + '" onclick="openPayModeModal(this)" style="width:100%;padding:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">✅ Mark as Fully Paid</button></div>';
   });
   document.getElementById('paymentsContent').innerHTML = html;
 }
-async function markPaid(btn) {
+function markPaid(btn) {
   var id = btn.getAttribute('data-id');
   var b  = bookings.find(function(x){ return x.id===id; });
-  if (!b || !confirm('Mark '+b.customer+' as fully paid?')) return;
-  var r = await apiPost({ action:'editBooking', id:b.id, sport:b.sport, date:b.date, start:cleanTime(b.start), end:cleanTime(b.end), customer:b.customer, phone:b.phone, total:b.total, advance:b.total, status:'Paid' });
-  if (r.success) { showToast('✅ Marked as Paid!'); await reload(); }
+  if (!b) return;
+  // Show payment mode modal
+  document.getElementById('pmBkId').value       = id;
+  document.getElementById('pmAmount').textContent= '₹' + Number(b.due).toLocaleString();
+  document.getElementById('pmCustomer').textContent = b.customer;
+  document.getElementById('pmMode').value        = '';
+  document.getElementById('payModeModal').classList.add('open');
+}
+async function submitMarkPaid() {
+  var id   = document.getElementById('pmBkId').value;
+  var mode = document.getElementById('pmMode').value;
+  if (!mode) { showToast('❌ Select payment mode!'); return; }
+  var b = bookings.find(function(x){ return x.id===id; });
+  if (!b) return;
+  var btn = document.getElementById('pmSubmitBtn');
+  btn.textContent='⏳...'; btn.disabled=true;
+  var r = await apiPost({ action:'editBooking', id:b.id, sport:b.sport, date:b.date, start:cleanTime(b.start), end:cleanTime(b.end), customer:b.customer, phone:b.phone, total:b.total, advance:b.total, advanceMode:mode, status:'Paid' });
+  if (r.success) { showToast('✅ Marked as Paid via ' + mode + '!'); closeModal('payModeModal'); await reload(); }
   else showToast('❌ Error: '+(r.error||''));
+  btn.textContent='✅ Confirm Payment'; btn.disabled=false;
 }
 
 // ═══════════════════════════════════════

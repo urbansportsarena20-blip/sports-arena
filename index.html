@@ -888,6 +888,7 @@ function markPaid(btn) {
   document.getElementById('pmAmount').textContent= '₹' + Number(b.due).toLocaleString();
   document.getElementById('pmCustomer').textContent = b.customer;
   document.getElementById('pmMode').value        = '';
+  setPayMode('pm', '');
   document.getElementById('payModeModal').classList.add('open');
 }
 async function submitMarkPaid() {
@@ -1201,6 +1202,23 @@ async function submitMatchPlayer() {
 document.querySelectorAll('.modal-overlay').forEach(function(o){
   o.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 });
+
+
+// ── PAYMENT MODE HELPER ───────────────────────────────────────────
+function setPayMode(prefix, val) {
+  var el = document.getElementById(prefix + 'AdvanceMode');
+  if (el) el.value = val;
+  // Update button styles
+  var modes = ['Cash','Online','Both'];
+  modes.forEach(function(m) {
+    var btn = document.getElementById(prefix + 'Mode' + m);
+    if (btn) {
+      btn.style.background = (val === m) ? '#1B5E20' : 'white';
+      btn.style.color = (val === m) ? 'white' : '#212121';
+      btn.style.borderColor = (val === m) ? '#1B5E20' : '#E0E0E0';
+    }
+  });
+}
 
 // ═══════════════════════════════════════
 //  START

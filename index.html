@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -322,15 +325,13 @@ body.role-staff [data-admin]{ display:none !important }
       <div class="form-group"><label class="form-label">Total ₹ *</label><input class="form-input" type="number" id="bkTotal" oninput="calcDue()"/></div>
         <div class="form-group"><label class="form-label">Advance ₹</label><input class="form-input" type="number" id="bkAdvance" value="0" oninput="calcDue()"/></div>
     </div>
-    <div class="form-group"><label class="form-label">Due ₹</label><input class="form-input" type="number" id="bkDue" readonly style="background:#F5F5F5"/></div>
-    <div class="form-group">
+    <div class="form-group"><label class="form-label">Due ₹</label><input class="form-input" type="number" id="bkDue" readonly style="background:#F5F5F5"/></div>    <div class="form-group">
       <label class="form-label">Advance Payment Mode</label>
-      <div style="display:flex;gap:8px">
-        <button type="button" id="bkModeOnline" onclick="setPayMode('bk','Online')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">📱 Online</button>
-        <button type="button" id="bkModeCash" onclick="setPayMode('bk','Cash')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">💵 Cash</button>
-        <button type="button" id="bkModeBoth" onclick="setPayMode('bk','Both')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">🔀 Both</button>
-      </div>
-      <input type="hidden" id="bkPayMode" value=""/>
+      <select class="form-select" id="bkAdvanceMode">
+        <option value="">-- Select Mode --</option>
+        <option value="Cash">💵 Cash</option>
+        <option value="Online">📱 Online (UPI)</option>
+      </select>
     </div>
     <div id="bkBothFields" style="display:none">
       <div class="form-row">
@@ -738,7 +739,6 @@ function openBookingModal() {
   document.getElementById('bkAdvanceMode').value  = '';
   document.getElementById('bkDue').value          = '';
   document.getElementById('bkStatus').value       = 'Pending';
-  setPayMode('bk', '');
   document.getElementById('bookingModal').classList.add('open');
 }
 function editBk(btn) {

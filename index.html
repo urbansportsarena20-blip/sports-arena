@@ -424,18 +424,62 @@ body.role-staff [data-admin]{ display:none !important }
       <button class="modal-close" onclick="closeModal('payModeModal')">✕</button>
     </div>
     <input type="hidden" id="pmBkId"/>
-    <div style="text-align:center;padding:12px 0 16px">
-      <div style="font-size:26px;font-weight:800;color:var(--green)" id="pmAmount">₹0</div>
-      <div style="font-size:13px;color:var(--text-soft);margin-top:4px">Due from <b id="pmCustomer"></b></div>
+
+    <div style="background:var(--green-lite);border-radius:12px;padding:14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:13px;color:var(--text-soft)">Due from</div>
+      <div style="font-size:16px;font-weight:800;color:var(--text)" id="pmCustomer"></div>
+      <div style="font-size:24px;font-weight:800;color:var(--orange);margin-top:4px" id="pmAmount"></div>
     </div>
+
     <div class="form-group">
-      <label class="form-label">Payment Mode *</label>
-      <select class="form-select" id="pmMode">
-        <option value="">-- Select Mode --</option>
-        <option value="Cash">💵 Cash</option>
-        <option value="Online">📱 Online (UPI)</option>
-      </select>
+      <label class="form-label">How was it paid?</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">
+        <button type="button" onclick="selectPayType('full_online')" id="pt_full_online"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+          📱 Full Online
+        </button>
+        <button type="button" onclick="selectPayType('full_cash')" id="pt_full_cash"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+          💵 Full Cash
+        </button>
+        <button type="button" onclick="selectPayType('split')" id="pt_split"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+          🔀 Split (Cash + Online)
+        </button>
+        <button type="button" onclick="selectPayType('leave_due')" id="pt_leave_due"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+          ⏳ Leave as Due
+        </button>
+      </div>
     </div>
+
+    <!-- Split fields - shown only when split selected -->
+    <div id="splitFields" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">💵 Cash ₹</label>
+          <input class="form-input" type="number" id="pmCashAmt" placeholder="0" oninput="calcSplitDue()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">📱 Online ₹</label>
+          <input class="form-input" type="number" id="pmOnlineAmt" placeholder="0" oninput="calcSplitDue()"/>
+        </div>
+      </div>
+      <div style="background:#FFF9C4;border-radius:8px;padding:10px;font-size:13px;color:#5D4037" id="splitSummary"></div>
+    </div>
+
+    <!-- Leave due field -->
+    <div id="leaveDueFields" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Partial Payment ₹ (optional)</label>
+        <input class="form-input" type="number" id="pmPartialAmt" placeholder="0 — enter if they paid something"/>
+      </div>
+      <div style="background:#FFF3E0;border-radius:8px;padding:10px;font-size:13px;color:#E65100">
+        ⏳ Remaining amount will stay as Due
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
     <button class="btn btn-primary" id="pmSubmitBtn" onclick="submitMarkPaid()">✅ Confirm Payment</button>
   </div>
 </div>
@@ -846,10 +890,45 @@ function renderPayments() {
   document.getElementById('paymentsContent').innerHTML = html;
 }
 
-function setPmMode(mode) {
-  var el = document.getElementById('pmMode');
-  if (el) el.value = mode;
+var currentPayType = '';
+var currentDueAmt = 0;
+
+function selectPayType(type) {
+  currentPayType = type;
+  // Update button styles
+  ['full_online','full_cash','split','leave_due'].forEach(function(t) {
+    var btn = document.getElementById('pt_' + t);
+    if (btn) {
+      btn.style.background = type===t ? '#1B5E20' : 'white';
+      btn.style.color = type===t ? 'white' : '#212121';
+      btn.style.borderColor = type===t ? '#1B5E20' : '#E0E0E0';
+    }
+  });
+  // Show/hide fields
+  document.getElementById('splitFields').style.display = type==='split' ? 'block' : 'none';
+  document.getElementById('leaveDueFields').style.display = type==='leave_due' ? 'block' : 'none';
+  if (type==='split') {
+    document.getElementById('pmCashAmt').value = '';
+    document.getElementById('pmOnlineAmt').value = '';
+    calcSplitDue();
+  }
+  if (type==='leave_due') {
+    document.getElementById('pmPartialAmt').value = '';
+  }
 }
+
+function calcSplitDue() {
+  var cash   = Number(document.getElementById('pmCashAmt').value)||0;
+  var online = Number(document.getElementById('pmOnlineAmt').value)||0;
+  var paid   = cash + online;
+  var remaining = Math.max(0, currentDueAmt - paid);
+  var summary = document.getElementById('splitSummary');
+  if (summary) {
+    summary.innerHTML = '💵 Cash: ₹'+cash+' &nbsp;|&nbsp; 📱 Online: ₹'+online+'<br/>'
+      + (remaining>0 ? '⏳ Still Due: ₹'+remaining : '✅ Fully paid!');
+  }
+}
+
 function openPayModeModal(btn) { markPaid(btn); }
 function markPaid(btn) {
   var id = btn.getAttribute('data-id');
@@ -864,17 +943,59 @@ function markPaid(btn) {
   document.getElementById('payModeModal').classList.add('open');
 }
 async function submitMarkPaid() {
-  var id   = document.getElementById('pmBkId').value;
-  var modeEl = document.getElementById('pmMode');
-  var mode = modeEl ? modeEl.value : (document.getElementById('pmPayMode') ? document.getElementById('pmPayMode').value : '');
-  if (!mode) { showToast('❌ Select payment mode!'); return; }
-  var b = bookings.find(function(x){ return x.id===id; });
+  var id = document.getElementById('pmBkId').value;
+  var b  = bookings.find(function(x){ return x.id===id; });
   if (!b) return;
+
+  if (!currentPayType) { showToast('❌ Select how it was paid!'); return; }
+
+  var newAdvance = Number(b.advance)||0;
+  var newDue = Number(b.due)||0;
+  var advanceMode = '';
+  var newStatus = b.status;
+
+  if (currentPayType === 'full_online') {
+    newAdvance = Number(b.total);
+    newDue = 0;
+    advanceMode = 'Online';
+    newStatus = 'Paid';
+  } else if (currentPayType === 'full_cash') {
+    newAdvance = Number(b.total);
+    newDue = 0;
+    advanceMode = 'Cash';
+    newStatus = 'Paid';
+  } else if (currentPayType === 'split') {
+    var cash   = Number(document.getElementById('pmCashAmt').value)||0;
+    var online = Number(document.getElementById('pmOnlineAmt').value)||0;
+    if (!cash && !online) { showToast('❌ Enter cash or online amount!'); return; }
+    newAdvance = (Number(b.advance)||0) + cash + online;
+    newDue = Math.max(0, Number(b.total) - newAdvance);
+    advanceMode = 'Split';
+    newStatus = newDue===0 ? 'Paid' : 'Pending';
+  } else if (currentPayType === 'leave_due') {
+    var partial = Number(document.getElementById('pmPartialAmt').value)||0;
+    newAdvance = (Number(b.advance)||0) + partial;
+    newDue = Math.max(0, Number(b.total) - newAdvance);
+    advanceMode = b.advanceMode || '';
+    newStatus = 'Pending';
+  }
+
   var btn = document.getElementById('pmSubmitBtn');
   btn.textContent='⏳...'; btn.disabled=true;
-  var r = await apiPost({ action:'editBooking', id:b.id, sport:b.sport, date:b.date, start:cleanTime(b.start), end:cleanTime(b.end), customer:b.customer, phone:b.phone, total:b.total, advance:b.total, advanceMode:mode, status:'Paid' });
-  if (r.success) { showToast('✅ Marked as Paid via ' + mode + '!'); closeModal('payModeModal'); await reload(); }
-  else showToast('❌ Error: '+(r.error||''));
+  try {
+    var r = await apiPost({
+      action:'editBooking', id:b.id, sport:b.sport, date:b.date,
+      start:cleanTime(b.start), end:cleanTime(b.end),
+      customer:b.customer, phone:b.phone,
+      total:b.total, advance:newAdvance, advanceMode:advanceMode, status:newStatus
+    });
+    if (r.success) {
+      var msg = currentPayType==='leave_due' ? '⏳ Due updated!' : '✅ Payment recorded!';
+      showToast(msg);
+      closeModal('payModeModal');
+      await reload();
+    } else showToast('❌ '+(r.error||'Error'));
+  } catch(e) { showToast('❌ Network error'); }
   btn.textContent='✅ Confirm Payment'; btn.disabled=false;
 }
 

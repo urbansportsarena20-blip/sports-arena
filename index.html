@@ -420,45 +420,13 @@ body.role-staff [data-admin]{ display:none !important }
 <div class="modal-overlay" id="payModeModal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">✅ Mark as Fully Paid</div>
-      <button class="modal-close" onclick="closeModal('payModeModal')">✕</button>
-    </div>
-    <input type="hidden" id="pmBookingId"/>
-    <p style="font-size:13px;color:#616161;margin-bottom:16px">Select how the remaining due amount was received:</p>
-    <div class="form-group">
-      <label class="form-label">Payment Mode *</label>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button type="button" id="pmModeOnline" onclick="setPmMode('Online')" style="flex:1;padding:12px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">📱 Online</button>
-        <button type="button" id="pmModeCash"   onclick="setPmMode('Cash')"   style="flex:1;padding:12px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">💵 Cash</button>
-        <button type="button" id="pmModeBoth"   onclick="setPmMode('Both')"   style="flex:1;padding:12px;border-radius:10px;border:2px solid #E0E0E0;background:white;font-size:13px;font-weight:700;cursor:pointer">🔀 Both</button>
-      </div>
-      <input type="hidden" id="pmPayMode" value=""/>
-    </div>
-    <div id="pmBothFields" style="display:none">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Online ₹</label><input class="form-input" type="number" id="pmOnlineAmt" value="0"/></div>
-        <div class="form-group"><label class="form-label">Cash ₹</label><input class="form-input" type="number" id="pmCashAmt" value="0"/></div>
-      </div>
-    </div>
-    <div style="background:#F5F5F5;border-radius:10px;padding:12px;margin-bottom:14px">
-      <div style="font-size:12px;color:#616161">Due Amount</div>
-      <div style="font-size:20px;font-weight:800;color:var(--orange)" id="pmDueAmount">₹0</div>
-    </div>
-    <button class="btn btn-primary" onclick="confirmMarkPaid()">✅ Confirm Payment</button>
-  </div>
-</div>
-
-<!-- PAYMENT MODE MODAL -->
-<div class="modal-overlay" id="payModeModal">
-  <div class="modal">
-    <div class="modal-header">
       <div class="modal-title">💰 Record Payment</div>
       <button class="modal-close" onclick="closeModal('payModeModal')">✕</button>
     </div>
     <input type="hidden" id="pmBkId"/>
-    <div style="text-align:center;padding:16px 0">
-      <div style="font-size:28px;font-weight:800;color:var(--green)" id="pmAmount"></div>
-      <div style="font-size:14px;color:var(--text-soft);margin-top:4px">Payment from <b id="pmCustomer"></b></div>
+    <div style="text-align:center;padding:12px 0 16px">
+      <div style="font-size:26px;font-weight:800;color:var(--green)" id="pmAmount">₹0</div>
+      <div style="font-size:13px;color:var(--text-soft);margin-top:4px">Due from <b id="pmCustomer"></b></div>
     </div>
     <div class="form-group">
       <label class="form-label">Payment Mode *</label>
@@ -878,6 +846,10 @@ function renderPayments() {
   document.getElementById('paymentsContent').innerHTML = html;
 }
 
+function setPmMode(mode) {
+  var el = document.getElementById('pmMode');
+  if (el) el.value = mode;
+}
 function openPayModeModal(btn) { markPaid(btn); }
 function markPaid(btn) {
   var id = btn.getAttribute('data-id');
@@ -893,7 +865,8 @@ function markPaid(btn) {
 }
 async function submitMarkPaid() {
   var id   = document.getElementById('pmBkId').value;
-  var mode = document.getElementById('pmMode').value;
+  var modeEl = document.getElementById('pmMode');
+  var mode = modeEl ? modeEl.value : (document.getElementById('pmPayMode') ? document.getElementById('pmPayMode').value : '');
   if (!mode) { showToast('❌ Select payment mode!'); return; }
   var b = bookings.find(function(x){ return x.id===id; });
   if (!b) return;

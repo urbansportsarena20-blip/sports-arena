@@ -877,6 +877,8 @@ function renderPayments() {
   });
   document.getElementById('paymentsContent').innerHTML = html;
 }
+
+function openPayModeModal(btn) { markPaid(btn); }
 function markPaid(btn) {
   var id = btn.getAttribute('data-id');
   var b  = bookings.find(function(x){ return x.id===id; });

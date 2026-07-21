@@ -783,9 +783,7 @@ async function submitBooking() {
   var total  = Number(document.getElementById('bkTotal').value)||0;
   var advance= Number(document.getElementById('bkAdvance').value)||0;
   var status  = document.getElementById('bkStatus').value;
-  var payMode = document.getElementById('bkPayMode').value;
-  var onlineAmt = Number(document.getElementById('bkOnlineAmt').value)||0;
-  var cashAmt   = Number(document.getElementById('bkCashAmt').value)||0;
+  var advanceMode = document.getElementById('bkAdvanceMode') ? document.getElementById('bkAdvanceMode').value : '';
   if (!sport||!date||!start||!end||!cust||!total) { showToast('❌ Fill all required fields!'); return; }
   var btn = document.getElementById('bkSubmitBtn');
   btn.textContent = '⏳ Saving...'; btn.disabled = true;
